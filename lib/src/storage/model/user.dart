@@ -49,22 +49,11 @@ class User extends NamedThumbmail {
 
   @override
   String get name {
-    return name!;
+    return name;
   }
 
   // 反序列化
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
   // 序列化
   Map<String, dynamic> toJson() => _$UserToJson(this);
-}
-
-@JsonSerializable(fieldRename: FieldRename.snake)
-class UserId {
-  @JsonKey()
-  String id;
-  UserId({required this.id});
-  // 反序列化
-  factory UserId.fromJson(Map<String, dynamic> json) => _$UserIdFromJson(json);
-  // 序列化
-  Map<String, dynamic> toJson() => _$UserIdToJson(this);
 }

@@ -47,11 +47,3 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'phone_number': instance.phoneNumber,
       'name': instance.name,
     };
-
-UserId _$UserIdFromJson(Map<String, dynamic> json) => UserId(
-      id: json['id'] as String,
-    );
-
-Map<String, dynamic> _$UserIdToJson(UserId instance) => <String, dynamic>{
-      'id': instance.id,
-    };

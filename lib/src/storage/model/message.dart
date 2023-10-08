@@ -22,33 +22,25 @@ class Message extends SqliteModel {
   static const List<String> fields = [
     'id TEXT PRIMARY KEY',
     'channel_id TEXT',
-    'type TEXT',
     'prev_id TEXT',
+    'type TEXT',
     'content TEXT',
-    'creator TEXT',
     'creator_id TEXT',
+    'creator_thumbnail TEXT',
+    'creator_name TEXT',
     'creator_user_id TEXT',
     'read_count INTEGER',
     'updated_at TEXT',
     'created_at TEXT'
   ];
-  @JsonKey()
   String id;
-  @JsonKey()
   String channelId;
-  @JsonKey()
   String type;
-  @JsonKey(disallowNullValue: false)
   String? prevId;
-  @JsonKey()
   dynamic content;
-  @JsonKey()
   Subscriber creator;
-  @JsonKey()
   DateTime? createdAt;
-  @JsonKey()
   DateTime? updatedAt;
-  @JsonKey()
   int? readCount;
   Message({
     required this.id,
@@ -74,10 +66,11 @@ class Message extends SqliteModel {
   @override
   Map<String, dynamic> toSqliteMap() {
     var data = toJson();
-    data["creator"] = jsonEncode(data["creator"]);
     data["creator_id"] = creator.id;
-    data["creator_user_id"] = creator.user.id;
-    data["content"] = jsonEncode(data["content"]);
+    data['creator_thumbnail'] = creator.thumbnail;
+    data['creator_nickname'] = creator.nickname;
+    data["creator_user_id"] = creator.userId;
+    data["content"] = jsonEncode(content);
     return data;
   }
 
@@ -86,18 +79,15 @@ class Message extends SqliteModel {
 
   static List<Message> fromSqlite(List<Map<String, Object?>> list) {
     List<Message> ret = [];
-    for (var i in list) {
-      Map<String, dynamic> data = {};
-      i.forEach((key, value) {
-        if (key == "creator" && value is String) {
-          data["creator"] = jsonDecode(value);
-        } else if (key == "content" && value is String) {
-          data["content"] = jsonDecode(value);
-        } else {
-          data[key] = value;
-        }
-      });
-      ret.add(Message.fromJson(data));
+    for (var item in list) {
+      item['creator'] = {
+        'id': item['creator_id'],
+        'user_id': item['creator_user_id'],
+        'thumbnail': item['creator_thumbnail'],
+        'nickname': item['creator_nickname'],
+      };
+      item['content'] = jsonDecode(item['content'] as String);
+      ret.add(Message.fromJson(item));
     }
     return ret;
   }

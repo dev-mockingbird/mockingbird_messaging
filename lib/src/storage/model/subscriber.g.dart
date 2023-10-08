@@ -8,12 +8,13 @@ part of 'subscriber.dart';
 
 Subscriber _$SubscriberFromJson(Map<String, dynamic> json) => Subscriber(
       id: json['id'] as String,
+      userId: json['user_id'] as String,
+      role: json['role'] as int?,
       thumbnail: json['thumbnail'] as String?,
       nickname: json['nickname'] as String?,
       createdAt: json['created_at'] == null
           ? null
           : DateTime.parse(json['created_at'] as String),
-      user: UserId.fromJson(json['user'] as Map<String, dynamic>),
     )..name = json['name'] as String?;
 
 Map<String, dynamic> _$SubscriberToJson(Subscriber instance) =>
@@ -23,5 +24,6 @@ Map<String, dynamic> _$SubscriberToJson(Subscriber instance) =>
       'nickname': instance.nickname,
       'thumbnail': instance.thumbnail,
       'created_at': instance.createdAt?.toIso8601String(),
-      'user': instance.user,
+      'user_id': instance.userId,
+      'role': instance.role,
     };

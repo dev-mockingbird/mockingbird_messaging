@@ -10,64 +10,58 @@ import 'package:mockingbird_messaging/src/storage/model/message.dart';
 import 'package:mockingbird_messaging/src/storage/sqlite.dart';
 part 'channel.g.dart';
 
+class ChannelType {
+  static const peer = 0;
+  static const group = 1;
+  static const channel = 2;
+}
+
 @JsonSerializable(fieldRename: FieldRename.snake)
 class Channel extends SqliteModel {
-  static const int roleOwner = 0;
-  static const int roleManager = 1;
-  static const int roleSubscriber = 2;
-  static const int roleGuest = 3;
-  static const int roleAny = 10;
   static const String stableName = "channels";
   static const List<String> fields = [
     'id TEXT',
-    'user_id TEXT',
     'name TEXT',
-    'avatar_url TEXT',
-    'folder TEXT',
-    'category TEXT',
-    'peer_user_id TEXT',
-    'last_read_message_id TEXT',
-    'current_seen_message_id TEXT',
-    'last_read_message_at TEXT',
-    'last_message_created_at TEXT',
-    'last_message TEXT',
+    'nickname TEXT',
     'description TEXT',
-    'unread_messages INTEGER',
+    'user_id TEXT',
+    'thumbnail TEXT',
+    'folder TEXT',
+    'type TEXT',
     'role INTEGER',
     'messages INTEGER',
     'subscribers INTEGER',
+    'unread_messages INTEGER',
+    'peer_user_id TEXT',
     'read_max_role INTEGER',
     'write_max_role INTEGER',
-    'last_event_id TEXT',
+    'current_seen_message_id TEXT',
+    'last_read_message_id TEXT',
+    'last_read_message_at TEXT',
+    'last_message_created_at TEXT',
+    'last_message TEXT',
     'created_at TEXT',
-    'PRIMARY KEY (id, user_id)'
+    'PRIMARY KEY (id)'
   ];
   String id;
   String name;
+  String? nickname;
   String userId;
-  @JsonKey(disallowNullValue: false)
-  String? avatarUrl;
-  @JsonKey(disallowNullValue: false)
+  int readMaxRole;
+  int writeMaxRole;
+  String type;
+  String? thumbnail;
   String? folder;
-  String category;
-  @JsonKey(disallowNullValue: false)
   String? peerUserId;
-  @JsonKey(disallowNullValue: false)
   String? lastReadMessageId;
-  @JsonKey(disallowNullValue: false)
   DateTime? lastReadMessageAt;
-  @JsonKey(disallowNullValue: false)
   DateTime? createdAt;
-  @JsonKey(disallowNullValue: false)
   Message? lastMessage;
-  @JsonKey(disallowNullValue: false)
   String? description;
   int unreadMessages;
   int role;
   int messages;
   int subscribers;
-  int readMaxRole;
-  int writeMaxRole;
   @JsonKey(disallowNullValue: false)
   String? lastEventId;
 
@@ -110,7 +104,6 @@ class Channel extends SqliteModel {
 
   Channel({
     required this.id,
-    required this.category,
     this.createdAt,
     required this.readMaxRole,
     required this.userId,
@@ -118,7 +111,9 @@ class Channel extends SqliteModel {
     required this.name,
     required this.role,
     required this.unreadMessages,
-    this.avatarUrl,
+    required this.type,
+    this.nickname,
+    this.thumbnail,
     this.peerUserId,
     this.lastMessage,
     this.folder,
@@ -131,8 +126,8 @@ class Channel extends SqliteModel {
   });
 
   Channel.empty({this.id = ""})
-      : category = "chat",
-        userId = "",
+      : userId = "",
+        type = "",
         readMaxRole = 0,
         writeMaxRole = 0,
         name = "",
