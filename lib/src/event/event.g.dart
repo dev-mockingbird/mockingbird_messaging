@@ -8,14 +8,18 @@ part of 'event.dart';
 
 Event _$EventFromJson(Map<String, dynamic> json) => Event(
       type: json['type'] as String,
-      payload: json['payload'] as Map<String, dynamic>?,
-      id: json['id'] as String? ?? '',
+      metadata: (json['metadata'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(k, e as String),
+      ),
+      createTimestamp: json['create_timestamp'] as int? ?? 0,
+      data: json['data'] as String?,
     );
 
 Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
-      'id': instance.id,
       'type': instance.type,
-      'payload': instance.payload,
+      'metadata': instance.metadata,
+      'data': instance.data,
+      'create_timestamp': instance.createTimestamp,
     };
 
 ModelChanged _$ModelChangedFromJson(Map<String, dynamic> json) => ModelChanged(

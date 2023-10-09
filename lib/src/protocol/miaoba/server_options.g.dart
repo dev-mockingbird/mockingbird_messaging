@@ -6,30 +6,36 @@ part of 'server_options.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+ScramInfo _$ScramInfoFromJson(Map<String, dynamic> json) => ScramInfo(
+      info: json['info'] as String,
+    );
+
+Map<String, dynamic> _$ScramInfoToJson(ScramInfo instance) => <String, dynamic>{
+      'info': instance.info,
+    };
+
 AcceptAuth _$AcceptAuthFromJson(Map<String, dynamic> json) => AcceptAuth(
       authMethod: json['auth_method'] as String,
       token: json['token'] as String?,
-      username: json['username'] as String?,
-      password: json['password'] as String?,
+      info: json['info'] as String?,
     );
 
 Map<String, dynamic> _$AcceptAuthToJson(AcceptAuth instance) =>
     <String, dynamic>{
       'auth_method': instance.authMethod,
       'token': instance.token,
-      'username': instance.username,
-      'password': instance.password,
+      'info': instance.info,
     };
 
 AcceptCrypto _$AcceptCryptoFromJson(Map<String, dynamic> json) => AcceptCrypto(
       cryptoMethod: json['crypto_method'] as String,
-      clientRSAPublicKey: json['client_r_s_a_public_key'] as String?,
+      clientRSAPublicKey: json['client_rsa_public_key'] as String?,
     );
 
 Map<String, dynamic> _$AcceptCryptoToJson(AcceptCrypto instance) =>
     <String, dynamic>{
       'crypto_method': instance.cryptoMethod,
-      'client_r_s_a_public_key': instance.clientRSAPublicKey,
+      'client_rsa_public_key': instance.clientRSAPublicKey,
     };
 
 CryptoAccepted _$CryptoAcceptedFromJson(Map<String, dynamic> json) =>

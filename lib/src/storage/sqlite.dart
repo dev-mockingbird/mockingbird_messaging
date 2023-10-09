@@ -96,21 +96,7 @@ class Sqlite {
       db.execute(
         """
         CREATE TABLE contacts(
-          id TEXT PRIMARY KEY,
-          owner_user_id TEXT,
-          contact_nickname TEXT,
-          contact_avatar_url TEXT,
-          contact_note TEXT,
-          user_id TEXT,
-          user_name TEXT,
-          user_nickname TEXT,
-          user_avatar_url TEXT,
-          user_email_addr TEXT,
-          user_phone_number TEXT,
-          user_created_at TEXT,
-          email_addr_verified INTEGER,
-          phone_number_verified INTEGER,
-          created_at TEXT
+
         )
       """,
       )

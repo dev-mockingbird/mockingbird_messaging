@@ -3,26 +3,50 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
+import 'dart:convert';
+
+import 'package:flutter/widgets.dart';
 import 'package:json_annotation/json_annotation.dart';
 part 'event.g.dart';
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class Event {
-  String id;
   String type;
+  Map<String, String>? metadata;
+  @JsonKey(includeFromJson: false, includeToJson: false)
   Map<String, dynamic>? payload;
+  String? data;
+  int createTimestamp;
   Event({
     required this.type,
+    this.metadata,
+    this.createTimestamp = 0,
     this.payload,
-    this.id = '',
+    this.data,
   }) {
-    if (id == '') {
-      id = generateId();
+    if (createTimestamp == 0) {
+      createTimestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     }
   }
 
-  String generateId() {
-    return '';
+  packPayload() {
+    metadata = metadata ?? {};
+    metadata!['encoding'] = "json";
+    data = base64Encode(utf8.encode(jsonEncode(payload)));
+  }
+
+  unpackPayload() {
+    if (data == null) {
+      return;
+    }
+    var encoding = metadata?['encoding'] ?? 'json';
+    switch (encoding) {
+      case 'json':
+        payload = jsonDecode(
+            String.fromCharCodes(base64Decode(utf8.decode(data!.codeUnits))));
+      default:
+        throw Exception("unexpected encoding $encoding");
+    }
   }
 
   factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(json);

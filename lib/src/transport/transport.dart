@@ -7,38 +7,12 @@ import 'package:flutter/foundation.dart';
 
 typedef Packet = Uint8List;
 
-abstract class SendCloser {
-  Future send(Packet packet);
-  Future close();
-}
-
 abstract class Layer {
   Future<Packet> encode(Packet p);
   Future<Packet> decode(Packet p);
 }
 
-class LayeredSendCloser extends SendCloser {
-  List<Layer>? layers;
-  final SendCloser sendCloser;
-
-  LayeredSendCloser({required this.sendCloser, this.layers});
-
-  @override
-  Future send(Packet packet) async {
-    List<Layer> ls = layers ?? [];
-    for (var i = ls.length - 1; i >= 0; i--) {
-      packet = await ls[i].encode(packet);
-    }
-    return await sendCloser.send(packet);
-  }
-
-  @override
-  Future close() async {
-    return await sendCloser.close();
-  }
-}
-
-typedef TransportEventHandler = Future Function(Packet packet, SendCloser sc);
+typedef TransportEventHandler = Future Function(Packet packet, Transport t);
 
 abstract class Transport extends ChangeNotifier {
   List<TransportEventHandler> handlers = [];
@@ -52,16 +26,26 @@ abstract class Transport extends ChangeNotifier {
   }
 
   Future listen();
-  Future send(Packet packet);
+
+  Future send(Packet packet) async {
+    List<Layer> ls = layers;
+    for (var i = ls.length - 1; i >= 0; i--) {
+      packet = await ls[i].encode(packet);
+    }
+    return await sendPacket(packet);
+  }
+
+  Future sendPacket(Packet packet);
+
   Future close();
 
   @protected
-  Future handle(Packet packet, SendCloser sc) async {
+  Future handle(Packet packet, Transport sc) async {
     for (var layer in layers) {
       packet = await layer.decode(packet);
     }
     for (var handler in handlers) {
-      handler(packet, LayeredSendCloser(sendCloser: sc));
+      handler(packet, this);
     }
   }
 

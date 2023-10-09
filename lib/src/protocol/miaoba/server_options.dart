@@ -3,10 +3,28 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
+import 'package:crypto/crypto.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import '../event/event.dart';
+import '../../event/event.dart';
 part 'server_options.g.dart';
+
+@JsonSerializable(fieldRename: FieldRename.snake)
+class ScramInfo extends Payload {
+  static const eventType = "scram-info";
+  String info;
+
+  ScramInfo({required this.info});
+
+  @override
+  Map<String, dynamic> toJson() => _$ScramInfoToJson(this);
+
+  factory ScramInfo.fromJson(Map<String, dynamic> json) =>
+      _$ScramInfoFromJson(json);
+
+  @override
+  String get type => eventType;
+}
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class AcceptAuth extends Payload {
@@ -14,16 +32,55 @@ class AcceptAuth extends Payload {
   static const methodToken = "AUTH-TOKEN";
   static const methodScram = "AUTH-SCRAM";
 
+  static const scramSha1 = "SCRAM-SHA-1";
+  static const scramSha1PLUS = "SCRAM-SHA-1-PLUS";
+  static const scramSha256 = "SCRAM-SHA-256";
+  static const scramSha256PLUS = "SCRAM-SHA-256-PLUS";
+  static const scramSha512 = "SCRAM-SHA-512";
+  static const scramSha512PLUS = "SCRAM-SHA-512-PLUS";
+  static const scramSha224 = "SCRAM-SHA-224";
+  static const scramSha224PLUS = "SCRAM-SHA-224-PLUS";
+  static const scramSha384 = "SCRAM-SHA-384";
+  static const scramSha384PLUS = "SCRAM-SHA-384-PLUS";
+  static const scramSha3224 = "SCRAM-SHA3-224";
+  static const scramSha3224PLUS = "SCRAM-SHA3-224-PLUS";
+  static const scramSha3256 = "SCRAM-SHA3-256";
+  static const scramSha3256PLUS = "SCRAM-SHA3-256-PLUS";
+  static const scramSha3384 = "SCRAM-SHA3-384";
+  static const scramSha3384PLUS = "SCRAM-SHA3-384-PLUS";
+  static const scramSha3512 = "SCRAM-SHA3-512";
+  static const scramSha3512PLUS = "SCRAM-SHA3-512-PLUS";
+
+  static Hash hash(String hashName) {
+    switch (hashName) {
+      case scramSha1:
+      case scramSha1PLUS:
+        return sha1;
+      case scramSha224:
+      case scramSha224PLUS:
+        return sha224;
+      case scramSha256:
+      case scramSha256PLUS:
+        return sha256;
+      case scramSha384:
+      case scramSha384PLUS:
+        return sha384;
+      case scramSha512:
+      case scramSha512PLUS:
+        return sha512;
+      default:
+        throw Exception("hash name not supported");
+    }
+  }
+
   String authMethod;
   String? token;
-  String? username;
-  String? password;
+  String? info;
 
   AcceptAuth({
     required this.authMethod,
     this.token,
-    this.username,
-    this.password,
+    this.info,
   });
 
   @override
@@ -52,6 +109,7 @@ class AcceptCrypto extends Payload {
   static const methodPlaintext = "PLAINTEXT";
 
   String cryptoMethod;
+  @JsonKey(name: 'client_rsa_public_key')
   String? clientRSAPublicKey;
   AcceptCrypto({
     required this.cryptoMethod,
@@ -89,11 +147,11 @@ class CryptoAccepted extends Payload {
 @JsonSerializable(fieldRename: FieldRename.snake)
 class AcceptCompress extends Payload {
   static const eventType = "accept-compress";
-  static const compressNo = "NO";
-  static const compressGzip = "GZIP";
-  static const compressFlate = "FLATE";
-  static const compressLzw = "LZW";
-  static const compressZlib = "ZLIB";
+  static const no = "NO";
+  static const gzip = "GZIP";
+  static const flate = "FLATE";
+  static const lzw = "LZW";
+  static const zlib = "ZLIB";
 
   String compressMethod;
   String? order;

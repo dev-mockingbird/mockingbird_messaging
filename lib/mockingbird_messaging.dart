@@ -56,7 +56,8 @@ class Mockingbird extends ChangeNotifier implements EventHandler {
   initialize({required Protocol proto, required Database db}) async {
     protocol = proto;
     this.db = db;
-    protocol.listen(this);
+    proto.handler = this;
+    protocol.listen();
     var models = {
       "channels": "",
       "messages": "",
