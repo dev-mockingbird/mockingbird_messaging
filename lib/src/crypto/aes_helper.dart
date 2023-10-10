@@ -8,48 +8,32 @@ import 'dart:typed_data';
 import 'package:pointycastle/export.dart';
 
 class AESHelper {
-  static const String password = "password_here";
   static const String algorithm = "AES";
   static FortunaRandom? _secureRandom;
 
-  static Uint8List decrypt(Uint8List cipherText, Uint8List key) {
-    CBCBlockCipher cipher = CBCBlockCipher(BlockCipher(algorithm));
-
-    Uint8List ciphertextlist = cipherText;
-    Uint8List iv = generateRandomBytes(128 ~/ 8);
-    Uint8List encrypted = ciphertextlist.sublist(20 + 16);
-
-    ParametersWithIV<KeyParameter> params =
-        ParametersWithIV<KeyParameter>(KeyParameter(key), iv);
-    PaddedBlockCipherParameters<ParametersWithIV<KeyParameter>, KeyParameter>
-        paddingParams = PaddedBlockCipherParameters<
-            ParametersWithIV<KeyParameter>, KeyParameter>(params, null);
-    PaddedBlockCipherImpl paddingCipher =
-        PaddedBlockCipherImpl(PKCS7Padding(), cipher);
-    paddingCipher.init(false, paddingParams);
-
-    return paddingCipher.process(encrypted);
+  static Uint8List decrypt(Uint8List ciphertext, Uint8List key) {
+    BlockCipher cipher = CBCBlockCipher(BlockCipher(algorithm));
+    final iv = ciphertext.sublist(0, 16);
+    final params = PaddedBlockCipherParameters(
+        ParametersWithIV<KeyParameter>(KeyParameter(key), iv), null);
+    final paddingCipher = PaddedBlockCipherImpl(PKCS7Padding(), cipher);
+    paddingCipher.init(false, params);
+    final encrypted = ciphertext.sublist(16);
+    final plaintext = paddingCipher.process(encrypted);
+    return plaintext;
   }
 
-  static Uint8List encrypt(Uint8List plainText, Uint8List key) {
-    final CBCBlockCipher cbcCipher = CBCBlockCipher(BlockCipher(algorithm));
-    List<int> data = plainText;
-    Uint8List iv = generateRandomBytes(128 ~/ 8);
-    final ParametersWithIV<KeyParameter> ivParams =
-        ParametersWithIV<KeyParameter>(KeyParameter(key), iv);
-    final PaddedBlockCipherParameters<ParametersWithIV<KeyParameter>,
-            KeyParameter> paddingParams =
-        PaddedBlockCipherParameters<ParametersWithIV<KeyParameter>,
-            KeyParameter>(ivParams, null);
-    final PaddedBlockCipherImpl paddedCipher =
-        PaddedBlockCipherImpl(PKCS7Padding(), cbcCipher);
-    paddedCipher.init(true, paddingParams);
-
-    try {
-      return paddedCipher.process(Uint8List.fromList(data));
-    } catch (e) {
-      return Uint8List.fromList([]);
-    }
+  static Uint8List encrypt(Uint8List plaintext, Uint8List key) {
+    final iv = generateRandomBytes(16);
+    final cipher = CBCBlockCipher(BlockCipher(algorithm));
+    final params = PaddedBlockCipherParameters(
+        ParametersWithIV<KeyParameter>(KeyParameter(key), iv), null);
+    final paddingCipher = PaddedBlockCipherImpl(PKCS7Padding(), cipher);
+    paddingCipher.init(true, params);
+    final encrypted = paddingCipher.process(plaintext);
+    final header = Uint8List(16)..setRange(0, 16, iv);
+    final finalCiphertext = Uint8List.fromList(header + encrypted);
+    return finalCiphertext;
   }
 
   /// [generateKey] Method

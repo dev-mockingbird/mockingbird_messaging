@@ -5,7 +5,6 @@
 
 import 'dart:convert';
 
-import 'package:flutter/widgets.dart';
 import 'package:json_annotation/json_annotation.dart';
 part 'event.g.dart';
 

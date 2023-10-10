@@ -3,6 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -11,24 +12,35 @@ import 'package:mockingbird_messaging/src/transport/encrypt.dart';
 import 'package:pointycastle/export.dart';
 
 const privateKeyPEM = """-----BEGIN PRIVATE KEY-----
-MIIFogIBAAKCAQEArFV4nJuQBRq3dB+pmpWjPcNwzXXUgw8C8+qdG3jvs2ubARAu72+pYDB4egd4/B/qHtfztrO5tVxfTjZhpPdEPrFc+oDVnWUgNZJIZCtTKskN+Phov+y/ojLoMzwIa9YH8wG07UGuf1NTlYcN+uGXrawko72qFsHxXN5A1N5S/7LyoKbmn3V5XwLI1gjedcHs4F6ETNKkVetYe+ZVMmGgbX5oE5fMTclphFVvT8+k/6FmlQDH2Fwpp34y0rY2A7QrL+4hQ3ZHf0Wq+kpmHouBwcplvbWImbBKDro6gHJlkJlzNUUFI51Khau2MJRJVeO/XugEfWX9l0r4Q/5IjKs5xwKCAQAd0xTylYGRQJRrRmeF10vPDpnhFPlYTSrHp9zUulNRi9fhkTluOrbnbLwM8mofyC4udFU7U1NabcgYsxSnBhwLdYqP1+ggOzYdz1kz7MOR7gW7BtKqFID9wy2oYEVc1Ee/6JW1Ud6vLm6SvDLRLmWfquEUbWiYU6w/1D8IGAnpMngmY+Ov3rps+pjyCSUh7px8m63l/wY8o6McoApsjasj/xyCWeewu8iv2VDSCBsd79T6g4dR2a4Q4eVoCroZxJNcCpwV3wwgrSOgeMyHDFophjbjTE8YQctfNIYMTMZCdijHI1uyzb0t12OavmWTFMS+BCVExLRTRb0jTI5PqWDBAoIBAB3TFPKVgZFAlGtGZ4XXS88OmeEU+VhNKsen3NS6U1GL1+GROW46tudsvAzyah/ILi50VTtTU1ptyBizFKcGHAt1io/X6CA7Nh3PWTPsw5HuBbsG0qoUgP3DLahgRVzUR7/olbVR3q8ubpK8MtEuZZ+q4RRtaJhTrD/UPwgYCekyeCZj46/eumz6mPIJJSHunHybreX/BjyjoxygCmyNqyP/HIJZ57C7yK/ZUNIIGx3v1PqDh1HZrhDh5WgKuhnEk1wKnBXfDCCtI6B4zIcMWimGNuNMTxhBy180hgxMxkJ2KMcjW7LNvS3XY5q+ZZMUxL4EJUTEtFNFvSNMjk+pYMECgYEA4SsiJAs+sf+JaHdA1ZlOO+8uwm2SYvMAKtV6MQ9ltccQ9E8G6t9AX2JvJ7S0lObG/R5lMZlHK+KNho7zqtcwUEs1dEDBz2M4VNVGImBRnREZETRCfye8MMGP/vIfq+jtvvtJtyipResPoF6crjQEQcKN/co9m7Z3j0dIFdEi6fECgYEAw+5RS+f88f5Zx16wZiUubxj/fTfvIUxOLiQGxheyTAdjA1TUjCTrsBUf0hIrVUx5YZnOmd8tjObXs/CyG9e5JGpuuv5kEkaMFpfwPoKS4swKS7M5Sp4JgSaGnCQhdnSyLS15aY7w8t9kqdZvrSfegGRPeqYcwZRmKEZ7Bp+7ZzcCgYEA1+qApoeR6yXbIa2ZIjoL5zUIZbCkevYB5xEmRv04zwLAo0VUoMzL8at2Y2DI+TADCJ2o89LDiLWKeMmDpwMKdTRpYbznHHNMhSyuQDCUkkTfALxYN45my2oRJqwO6s5FjKlymowHJeCt715KaFHA8z4Y4pCYW0SxiVcVLLaLAEECgYB3CnKmVbrfJJRTh3pRdUGzClMgNz24022kpwrejEMt4kcMHRxOUZhJEWyV66gcWSxeWl6mKmy4cQCZOSJdvEGmmGvSfQE8AVTX3VSABkFMPn/64ldquH4507hxYZpbKCehP0HHGqvWRFgawEh1wgVzqH6JnCdYjdtLmRbiPWZVHQKBgGgLpjErj92cTgnoqI7kNCZL9DvgbsfLBzbV/zkrrIlBb0sUPhw2PJKPEklSYrJRPRloiq7Aggoym5w9cPP8jEZReMHjIg4inJior6S0G03c12mO7TEOqTPPP+PCNHesDvnVasPJZCmRxfc8mriuqTWb3eS2Jn/euCv3KgwtAPqO
------END PRIVATE KEY----- """;
+MIIEqAIBAAKCAQEAws7jjVDnqzd7QDFYQRsO/keEKAJIq4oAilqU686xF2PuOAVDS3cHx4ZjEgcbbcgXLrprlKuyl2PlaVFiAjAqpRAgtEnxoFFFtSznRnHvmnbT8qQhgus2Z6q2u/GQ4HoSu8O4zTIyNcqQRFEAOhbDg4G8pA+r0wKqA7DmHMSHJG1hl2w9MEwwZw53lxUbQb/KICKXPK4zwm68BZCZFH1bYvE9wZFSzwxNMhYbvvIs4Y35BBLhKnqWjJkek+6X5Yz4iQzJlfJNyyJTz7Cc5bgokjkx9MoIUIkyopD7YapEvfhJ8FwLitdl86yo9fovdMSqbwP/zyMllhO8IR0efhqWLwIIf/////////8CggEADiASP9zt72xGc5EgZRghLi7hVkVUH5wSDfYjdjW2gYutakJ3brFizwTfih8ZzgwEIk9CHbWVbYTAzbIo+R+k9/MDbA8whf9enpRy8JiyVvDmzWE5TNThTQMD3PzXFG/Fi/fVHovVODFH5Kw65/tekdqGYx7/xn0a9smM5ekaI3nqfPNQXE/xy5dhg9LlokuJITPoC1yk1DkB2t0x4l31lOJxuvua5YyJMppcwen7X2k7EjGigTuPBeoLJiAKxobbA4tVVGSdbMsx6h2WiWBuQcFf7heWQoHDol9/ZuHLzATFOjJkTXlDW3RlnhNDKwasA2vn5c4I2IvYNt4PoOdMgQKBgQDqjtnsuHZuh4puB2URNxpEwH2CbPY0ji0mov5FD+0YBz3AGrPDzbuvBG9kWfNIKCeS1SREkreTYX6px+B4vk50jAu85sMN9xO6BewzujSEhWjYKBiazrmnXVoCkSqavT1FG5SRvUpvjl6ZxWZBrx9GVeZ8GLbB+uMcdIbjBeupIwKBgQDUnc7Lv1xS6/NimcscuY9bUEoT/SZRCv+/aYS2TdaD2fnQibPePhz33ijn3U5W26FPKDbDOenJVpMShn79Lun2EVlaRlo/wKEzyqfuZcBtoRbwq4iueMJIrVehadycVE81J/ppbt3w+Ef3yKpFyJBTLWAjFOsrOYldKF63pX5dhQKBgEQk/GsprD6wYidVPqehup/+zHf38A+Uvsla0UR/PAKfF/GX0GIygzR1tWcSOvvbrqOaCM9jULIgwQvSZgSuRVzW0xIueLy166U/0z+z+U4G9E7YV02igY1+MYhNZHNQR1yshp1QwS9nzVQfZXXvysZEbpHfHDl/CjxaHlYWgkDBAoGAfT8Q6LkrW7WexACww5UTu8jKOogvoCIIketIwFOOAFHRdWUIzextCB6Yni2hzkzG82hPCiX9cBtNu+X6vI58R/XkWueClneU/nts/WR3PJ1edBu4An8kg8eJDY7c5EJN/pQ0URN8Lk0zp+VPWJhTXIwoS8Iw3l+gaX40fZ5BmDkCgYEAnhLH+EBWNrL+4ODzjDhF9aePPi1iHe2pq6Phebuh8/vVgfKPrXQd1pMtJfgOzVjMWrkgNov8LyyFSIdWhlq7HBNWiGRd38HDe8utaqi1CuS9iTpazlb6rnh9Ka+WGN/zsPO8MS18fHPSvpyRKpopXLVYLggoDrqjw8bAM7ru3Xk=
+-----END PRIVATE KEY-----""";
 
 const publicKeyPEM = """-----BEGIN PUBLIC KEY-----
-MIIBCgKCAQEArFV4nJuQBRq3dB+pmpWjPcNwzXXUgw8C8+qdG3jvs2ubARAu72+pYDB4egd4/B/qHtfztrO5tVxfTjZhpPdEPrFc+oDVnWUgNZJIZCtTKskN+Phov+y/ojLoMzwIa9YH8wG07UGuf1NTlYcN+uGXrawko72qFsHxXN5A1N5S/7LyoKbmn3V5XwLI1gjedcHs4F6ETNKkVetYe+ZVMmGgbX5oE5fMTclphFVvT8+k/6FmlQDH2Fwpp34y0rY2A7QrL+4hQ3ZHf0Wq+kpmHouBwcplvbWImbBKDro6gHJlkJlzNUUFI51Khau2MJRJVeO/XugEfWX9l0r4Q/5IjKs5xwIDAQAB
+MIIBCgKCAQEAws7jjVDnqzd7QDFYQRsO/keEKAJIq4oAilqU686xF2PuOAVDS3cHx4ZjEgcbbcgXLrprlKuyl2PlaVFiAjAqpRAgtEnxoFFFtSznRnHvmnbT8qQhgus2Z6q2u/GQ4HoSu8O4zTIyNcqQRFEAOhbDg4G8pA+r0wKqA7DmHMSHJG1hl2w9MEwwZw53lxUbQb/KICKXPK4zwm68BZCZFH1bYvE9wZFSzwxNMhYbvvIs4Y35BBLhKnqWjJkek+6X5Yz4iQzJlfJNyyJTz7Cc5bgokjkx9MoIUIkyopD7YapEvfhJ8FwLitdl86yo9fovdMSqbwP/zyMllhO8IR0efhqWLwIDAQAB
 -----END PUBLIC KEY-----""";
 
 main() {
   group("test rsa", () {
-    // test("generate key pair", () {
-    //   var keyPair = RSAHelper.generateKeyPair();
-    //   var privateKeyPEM =
-    //       RSAHelper.encodePrivateKeyToPem(keyPair.privateKey as RSAPrivateKey);
-    //   print(privateKeyPEM);
-    //   var publicKeyPEM =
-    //       RSAHelper.encodePublicKeyToPem(keyPair.publicKey as RSAPublicKey);
-    //   print(publicKeyPEM);
-    // });
+    test("generate key pair", () {
+      var keyPair = RSAHelper.generateKeyPair();
+      var privateKeyPEM =
+          RSAHelper.encodePrivateKeyToPem(keyPair.privateKey as RSAPrivateKey);
+      print(privateKeyPEM);
+      var publicKeyPEM =
+          RSAHelper.encodePublicKeyToPem(keyPair.publicKey as RSAPublicKey);
+      print(publicKeyPEM);
+    });
+    test("decode", () {
+      var base64d =
+          "sXsavT2M+81FsdXPKC14rRDCuSWZBBQUdAHGZ3UmW4Mm/ksVnAwSyzQ3cIHOiiFZ6kRXnRcxQAPT7IlAdcJWuQE1RQYtXz+cjvbj7xOoGUi/eF4D6jKuJHjbWu9IXU/vxT7s1q4yhfISBoyvohDsIHyu3QpcRZeWzfSYCEFtK+y7bmLN8UVCG9JMuaOJdKtrTOCV3dkBmc+rt4ddhgi/0BZJeLQ9C7StLOGYfUHxZQu1iQGmkfRiw9jpJIVJIBzB/gCDOvhth62jXSsVAAbwl6A9wXFDH+8ZSKo2JiK8Pl5EarLHGF0CM+ZMdHLqBW9DV0i89ULQXCBDbVT0lXBuqw==";
+      var encrypted = base64Decode(base64d);
+      var privateKey = RSAHelper.parsePrivateKeyFromPem(privateKeyPEM);
+      if (privateKey == null) {
+        return;
+      }
+      var text = RSAHelper.decrypt(encrypted, privateKey, () => SHA256Digest());
+      print(String.fromCharCodes(text));
+    });
     var names = ["SHA-1", "SHA-224", "SHA-256", "SHA-384", "SHA-512"];
     for (var name in names) {
       test("encrypt $name", () async {

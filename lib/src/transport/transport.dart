@@ -3,6 +3,8 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 
 typedef Packet = Uint8List;
@@ -32,7 +34,9 @@ abstract class Transport extends ChangeNotifier {
     for (var i = ls.length - 1; i >= 0; i--) {
       packet = await ls[i].encode(packet);
     }
-    return await sendPacket(packet);
+    var s = base64Encode(packet);
+    print("send: $s");
+    return await sendPacket(Uint8List.fromList(s.codeUnits));
   }
 
   Future sendPacket(Packet packet);
@@ -41,6 +45,7 @@ abstract class Transport extends ChangeNotifier {
 
   @protected
   Future handle(Packet packet, Transport sc) async {
+    packet = base64Decode(String.fromCharCodes(packet));
     for (var layer in layers) {
       packet = await layer.decode(packet);
     }

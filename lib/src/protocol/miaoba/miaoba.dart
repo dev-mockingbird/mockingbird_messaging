@@ -93,6 +93,7 @@ class Miaoba extends Protocol {
         digestFactory: RSAEncrypter.getDigestFactory(hashName),
       );
       var aesKey = await encrypter.decode(encAesKey);
+      print("aes key: ${String.fromCharCodes(aesKey)}");
       transport.pushLayer(AESEncrypter(key: aesKey));
       return _startAcceptCompress();
     }
@@ -114,18 +115,20 @@ class Miaoba extends Protocol {
       throw Exception("compress $cm not supported");
     }
     transport.send(encodePayload(AcceptCompress(compressMethod: cm)));
-    switch (cm) {
-      case AcceptCompress.gzip:
-        transport.pushLayer(GZip());
-      default:
-        throw Exception("client not support compress $cm");
-    }
+
     _state = _State.acceptCompress;
   }
 
   _acceptCompress(Event e) {
     if (e.type != "compress-accepted") {
       throw Exception("[compress-accepted] event expected");
+    }
+    var cm = compressMethod ?? AcceptCompress.gzip;
+    switch (cm) {
+      case AcceptCompress.gzip:
+        transport.pushLayer(GZip());
+      default:
+        throw Exception("client not support compress $cm");
     }
     _startAcceptAuth();
   }

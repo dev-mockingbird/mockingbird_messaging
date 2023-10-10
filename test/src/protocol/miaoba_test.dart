@@ -16,6 +16,8 @@ void main() async {
         transport: WebsocketTransport("ws://127.0.0.1:7001"),
         encoding: JsonEncoding(),
         cryptoMethod: AcceptCrypto.methodAesRsaSha256,
+        username: "oliverzyang",
+        password: "yZ123456",
       );
       miaoba.listen();
       await Future.delayed(const Duration(hours: 1), () {});
