@@ -147,8 +147,10 @@ class Miaoba extends Protocol {
     if (bs == null) {
       throw Exception("can't get initial bytes");
     }
-    transport
-        .send(encodePayload(AcceptAuth(authMethod: sm, info: bs.toString())));
+    transport.send(encodePayload(AcceptAuth(
+        authMethod: AcceptAuth.methodScram,
+        mechanism: sm,
+        info: base64Encode(bs))));
     _scramState = SaslMessageType.AuthenticationSASLContinue;
     _state = _State.acceptAuth;
   }
@@ -162,9 +164,12 @@ class Miaoba extends Protocol {
       return;
     }
     var info = ScramInfo.fromJson(e.payload!);
-    var codes = info.info.codeUnits;
-    var bs = _scramAuth!.handleMessage(_scramState!, Uint8List.fromList(codes));
-    transport.send(encodePayload(ScramInfo(info: bs.toString())));
+    var codes = base64Decode(info.info);
+    print("server returned: ${String.fromCharCodes(codes)}");
+    var bs = _scramAuth!.handleMessage(_scramState!, codes);
+    if (bs != null) {
+      transport.send(encodePayload(ScramInfo(info: base64Encode(bs))));
+    }
     if (_scramState == SaslMessageType.AuthenticationSASLContinue) {
       _scramState = SaslMessageType.AuthenticationSASLFinal;
     } else if (_scramState == SaslMessageType.AuthenticationSASLFinal) {

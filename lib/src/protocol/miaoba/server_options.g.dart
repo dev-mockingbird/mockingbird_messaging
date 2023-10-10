@@ -18,11 +18,13 @@ AcceptAuth _$AcceptAuthFromJson(Map<String, dynamic> json) => AcceptAuth(
       authMethod: json['auth_method'] as String,
       token: json['token'] as String?,
       info: json['info'] as String?,
+      mechanism: json['mechanism'] as String?,
     );
 
 Map<String, dynamic> _$AcceptAuthToJson(AcceptAuth instance) =>
     <String, dynamic>{
       'auth_method': instance.authMethod,
+      'mechanism': instance.mechanism,
       'token': instance.token,
       'info': instance.info,
     };

@@ -31,7 +31,7 @@ abstract class Transport extends ChangeNotifier {
 
   Future send(Packet packet) async {
     List<Layer> ls = layers;
-    for (var i = ls.length - 1; i >= 0; i--) {
+    for (var i = 0; i < ls.length; i++) {
       packet = await ls[i].encode(packet);
     }
     var s = base64Encode(packet);
@@ -46,8 +46,8 @@ abstract class Transport extends ChangeNotifier {
   @protected
   Future handle(Packet packet, Transport sc) async {
     packet = base64Decode(String.fromCharCodes(packet));
-    for (var layer in layers) {
-      packet = await layer.decode(packet);
+    for (var i = layers.length - 1; i >= 0; i--) {
+      packet = await layers[i].decode(packet);
     }
     for (var handler in handlers) {
       handler(packet, this);

@@ -74,6 +74,7 @@ class AcceptAuth extends Payload {
   }
 
   String authMethod;
+  String? mechanism;
   String? token;
   String? info;
 
@@ -81,6 +82,7 @@ class AcceptAuth extends Payload {
     required this.authMethod,
     this.token,
     this.info,
+    this.mechanism,
   });
 
   @override
