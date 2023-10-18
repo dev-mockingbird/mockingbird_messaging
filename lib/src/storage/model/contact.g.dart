@@ -8,9 +8,8 @@ part of 'contact.dart';
 
 Contact _$ContactFromJson(Map<String, dynamic> json) => Contact(
       id: json['id'] as String,
-      user: User.fromJson(json['user'] as Map<String, dynamic>),
       ownerUserId: json['owner_user_id'] as String,
-      thumbnail: json['thumbnail'] as String?,
+      avatarUrl: json['avatar_url'] as String?,
       createdAt: json['created_at'] == null
           ? null
           : DateTime.parse(json['created_at'] as String),
@@ -22,9 +21,8 @@ Map<String, dynamic> _$ContactToJson(Contact instance) => <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
       'nickname': instance.nickname,
-      'thumbnail': instance.thumbnail,
+      'avatar_url': instance.avatarUrl,
       'created_at': instance.createdAt?.toIso8601String(),
       'note': instance.note,
-      'user': instance.user,
       'owner_user_id': instance.ownerUserId,
     };

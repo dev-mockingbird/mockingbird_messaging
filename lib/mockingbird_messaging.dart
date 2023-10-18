@@ -5,6 +5,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:mockingbird_messaging/src/event/event.dart';
 import 'package:mockingbird_messaging/src/storage/sync.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:uuid/uuid.dart';
 import 'src/protocol/protocol.dart';
 import 'src/storage/kv.dart';
 import 'src/storage/model/channel.dart';
@@ -15,20 +16,37 @@ part 'mockingbird_messaging.g.dart';
 typedef ModelChangedHandler = Function(ModelChanged);
 
 @JsonSerializable(fieldRename: FieldRename.snake)
-class FirstContact extends Payload {
-  static const String eventType = 'first-contact';
-  Map<String, String> models;
-  String lang;
-  FirstContact({
-    required this.models,
-    required this.lang,
-  });
+class SyncModelRequest extends Payload {
+  static const String eventType = 'model.sync';
+  String model;
+  int latestOffset;
 
-  factory FirstContact.fromJson(Map<String, dynamic> json) =>
-      _$FirstContactFromJson(json);
+  SyncModelRequest({required this.model, required this.latestOffset});
 
   @override
-  Map<String, dynamic> toJson() => _$FirstContactToJson(this);
+  Map<String, dynamic> toJson() => _$SyncModelRequestToJson(this);
+
+  @override
+  String get type => eventType;
+}
+
+@JsonSerializable(fieldRename: FieldRename.snake)
+class ConfigInfo extends Payload {
+  static const String eventType = 'config-info';
+  String lang;
+  String clientId;
+  DateTime time;
+  ConfigInfo({
+    required this.lang,
+    required this.clientId,
+    required this.time,
+  });
+
+  factory ConfigInfo.fromJson(Map<String, dynamic> json) =>
+      _$ConfigInfoFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$ConfigInfoToJson(this);
 
   @override
   String get type => eventType;
@@ -38,8 +56,16 @@ class Mockingbird extends ChangeNotifier implements EventHandler {
   static final Mockingbird instance = Mockingbird._();
   late Protocol protocol;
   String _lang = "en";
+  late String id;
   final List<ModelChangedHandler> _handlers = [];
   late Database db;
+  static List<String> models = [
+    "channels",
+    "subscribers",
+    "messages",
+    "contacts",
+    "users",
+  ];
 
   Mockingbird._();
 
@@ -54,19 +80,26 @@ class Mockingbird extends ChangeNotifier implements EventHandler {
   }
 
   initialize({required Protocol proto, required Database db}) async {
+    id = await KV.get<String>("client-id");
+    if (id == '') {
+      id = const Uuid().v1();
+      await KV.save("client-id", id);
+    }
     protocol = proto;
     this.db = db;
     proto.handler = this;
     protocol.listen();
-    var models = {
-      "channels": "",
-      "messages": "",
-      "contacts": "",
-    };
-    for (var table in models.keys) {
-      models[table] = await KV.get<String>(table);
+    protocol.send(buildEvent(ConfigInfo(
+      clientId: id,
+      lang: _lang,
+      time: DateTime.now(),
+    )));
+    for (var table in models) {
+      protocol.send(buildEvent(SyncModelRequest(
+        model: table,
+        latestOffset: await KV.get<int>(table),
+      )));
     }
-    protocol.send(buildEvent(FirstContact(models: models, lang: _lang)));
   }
 
   _changeLanguage(String lang) {}

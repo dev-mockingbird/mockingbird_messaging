@@ -13,6 +13,10 @@ import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'dart:io' show Platform;
 
+import 'model/contact.dart';
+import 'model/subscriber.dart';
+import 'model/user.dart';
+
 abstract class SqliteModel {
   String tableName();
   Map<String, dynamic> toSqliteMap();
@@ -88,17 +92,19 @@ class Sqlite {
   _initDatabase(Database db, version) async {
     Future.wait([
       db.execute(
-          "CREATE TABLE ${Channel.stableName}(${Channel.fields.join(",")})"),
+        "CREATE TABLE ${Channel.stableName}(${Channel.fields.join(",")})",
+      ),
       db.execute(
         "CREATE TABLE ${Message.stableName}(${Message.fields.join(",")})",
       ),
-      db.execute('DROP TABLE IF EXISTS contacts'),
       db.execute(
-        """
-        CREATE TABLE contacts(
-
-        )
-      """,
+        "CREATE TABLE ${User.stableName}(${User.fields.join(",")})",
+      ),
+      db.execute(
+        "CREATE TABLE ${Contact.stableName}(${Contact.fields.join(",")})",
+      ),
+      db.execute(
+        "CREATE TABLE ${Subscriber.stableName}(${Subscriber.fields.join(",")})",
       )
     ]);
   }

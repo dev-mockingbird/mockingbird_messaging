@@ -18,6 +18,7 @@ dependencies:
   pointycastle:
   archive: 
   sasl_scram:
+  uuid:
 
 dev_dependencies:
   flutter_test:

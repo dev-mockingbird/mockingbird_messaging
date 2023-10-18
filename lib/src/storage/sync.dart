@@ -14,47 +14,49 @@ class SyncDB {
   });
 
   applyEvent(ModelChanged event) async {
-    switch (event.type) {
-      case ModelChanged.deleted:
-        return await _delete(event);
-      case ModelChanged.updated:
-        return await _update(event);
-      case ModelChanged.created:
-        return await _create(event);
-      default:
-      // warning here
+    for (var action in event.actions) {
+      switch (event.type) {
+        case ModelAction.deleted:
+          await _delete(event.model, action);
+        case ModelAction.updated:
+          await _update(event.model, action);
+        case ModelAction.created:
+          await _create(event.model, action);
+        default:
+        // warning here
+      }
     }
   }
 
-  _create(ModelChanged event) async {
+  _create(String model, ModelAction event) async {
     if (event.data == null) {
       // warning here
       return;
     }
-    await db.insert(event.model, event.data!);
+    await db.insert(model, event.data!);
   }
 
-  _update(ModelChanged event) async {
+  _update(String model, ModelAction event) async {
     if (event.data == null) {
       // warning here
       return;
     }
     await db.update(
-      event.model,
+      model,
       event.data!,
       where: "id IN ?",
-      whereArgs: [event.ids],
+      whereArgs: [event.recordIds],
     );
   }
 
-  _delete(ModelChanged event) async {
+  _delete(String model, ModelAction event) async {
     if (event.data == null) {
       // warning here
       return;
     }
-    List<dynamic> whereArgs = [event.ids];
+    List<dynamic> whereArgs = [event.recordIds];
     await db.delete(
-      event.model,
+      model,
       where: "id IN ?",
       whereArgs: whereArgs,
     );

@@ -6,23 +6,22 @@ part of 'user.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-NamedThumbmail _$NamedThumbmailFromJson(Map<String, dynamic> json) =>
-    NamedThumbmail(
+NamedAvatar _$NamedAvatarFromJson(Map<String, dynamic> json) => NamedAvatar(
       id: json['id'] as String,
       name: json['name'] as String?,
       nickname: json['nickname'] as String?,
-      thumbnail: json['thumbnail'] as String?,
+      avatarUrl: json['avatar_url'] as String?,
       createdAt: json['created_at'] == null
           ? null
           : DateTime.parse(json['created_at'] as String),
     );
 
-Map<String, dynamic> _$NamedThumbmailToJson(NamedThumbmail instance) =>
+Map<String, dynamic> _$NamedAvatarToJson(NamedAvatar instance) =>
     <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
       'nickname': instance.nickname,
-      'thumbnail': instance.thumbnail,
+      'avatar_url': instance.avatarUrl,
       'created_at': instance.createdAt?.toIso8601String(),
     };
 
@@ -32,7 +31,7 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
       createdAt: json['created_at'] == null
           ? null
           : DateTime.parse(json['created_at'] as String),
-      thumbnail: json['thumbnail'] as String?,
+      avatarUrl: json['avatar_url'] as String?,
       nickname: json['nickname'] as String?,
       emailAddr: json['email_addr'] as String?,
       phoneNumber: json['phone_number'] as String?,
@@ -41,7 +40,7 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'id': instance.id,
       'nickname': instance.nickname,
-      'thumbnail': instance.thumbnail,
+      'avatar_url': instance.avatarUrl,
       'created_at': instance.createdAt?.toIso8601String(),
       'email_addr': instance.emailAddr,
       'phone_number': instance.phoneNumber,

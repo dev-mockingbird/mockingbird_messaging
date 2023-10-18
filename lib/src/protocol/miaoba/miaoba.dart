@@ -93,7 +93,6 @@ class Miaoba extends Protocol {
         digestFactory: RSAEncrypter.getDigestFactory(hashName),
       );
       var aesKey = await encrypter.decode(encAesKey);
-      print("aes key: ${String.fromCharCodes(aesKey)}");
       transport.pushLayer(AESEncrypter(key: aesKey));
       return _startAcceptCompress();
     }

@@ -67,28 +67,43 @@ Event buildEvent(Payload payload) {
 }
 
 @JsonSerializable(fieldRename: FieldRename.snake)
+class ModelAction {
+  static const String deleted = 'deleted';
+  static const String updated = 'updated';
+  static const String created = 'created';
+
+  String action;
+  int offset;
+  List<String>? recordIds;
+  Map<String, dynamic>? data;
+
+  ModelAction({
+    required this.action,
+    required this.offset,
+    this.recordIds,
+    this.data,
+  });
+
+  factory ModelAction.fromJson(Map<String, dynamic> json) =>
+      _$ModelActionFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ModelActionToJson(this);
+}
+
+@JsonSerializable(fieldRename: FieldRename.snake)
 class ModelChanged extends Payload {
   static const eventType = "model.changed";
-  static const String deleted = 'model.deleted';
-  static const String updated = 'model.updated';
-  static const String created = 'model.created';
+
+  String model;
+
+  List<ModelAction> actions;
+
+  ModelChanged({required this.model, required this.actions});
 
   @override
   String get type {
     return eventType;
   }
-
-  String model;
-  String changeType;
-  List<String>? ids;
-  Map<String, dynamic>? data;
-
-  ModelChanged({
-    required this.model,
-    required this.changeType,
-    this.ids,
-    this.data,
-  });
 
   factory ModelChanged.fromJson(Map<String, dynamic> json) =>
       _$ModelChangedFromJson(json);

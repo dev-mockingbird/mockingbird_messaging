@@ -7,19 +7,29 @@ import 'package:json_annotation/json_annotation.dart';
 part 'user.g.dart';
 
 @JsonSerializable(fieldRename: FieldRename.snake)
-class NamedThumbmail {
+class NamedAvatar {
   String id;
   String? name;
   String? nickname;
-  String? thumbnail;
+  String? avatarUrl;
   DateTime? createdAt;
-  NamedThumbmail({
+  NamedAvatar({
     required this.id,
     this.name,
     this.nickname,
-    this.thumbnail,
+    this.avatarUrl,
     this.createdAt,
   });
+
+  static List<String> get fields {
+    return [
+      "id TEXT PRIMARY KEY",
+      "name TEXT",
+      "nickname TEXT",
+      "avatar_url TEXT",
+      "craeted_at TEXT",
+    ];
+  }
 
   String get displayName {
     if (nickname != null) {
@@ -33,15 +43,26 @@ class NamedThumbmail {
 }
 
 @JsonSerializable(fieldRename: FieldRename.snake)
-class User extends NamedThumbmail {
+class User extends NamedAvatar {
   String? emailAddr;
   String? phoneNumber;
+
+  static String stableName = "users";
+
+  static List<String> get fields {
+    List<String> fields = NamedAvatar.fields;
+    fields.addAll([
+      "email_addr TEXT",
+      "phone_number TEXT",
+    ]);
+    return fields;
+  }
 
   User({
     required super.id,
     required super.name,
     super.createdAt,
-    super.thumbnail,
+    super.avatarUrl,
     super.nickname,
     this.emailAddr,
     this.phoneNumber,
@@ -49,7 +70,7 @@ class User extends NamedThumbmail {
 
   @override
   String get name {
-    return name;
+    return super.name ?? "";
   }
 
   // 反序列化

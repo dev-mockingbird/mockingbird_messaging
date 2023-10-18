@@ -22,17 +22,32 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
       'create_timestamp': instance.createTimestamp,
     };
 
+ModelAction _$ModelActionFromJson(Map<String, dynamic> json) => ModelAction(
+      action: json['action'] as String,
+      offset: json['offset'] as int,
+      recordIds: (json['record_ids'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+      data: json['data'] as Map<String, dynamic>?,
+    );
+
+Map<String, dynamic> _$ModelActionToJson(ModelAction instance) =>
+    <String, dynamic>{
+      'action': instance.action,
+      'offset': instance.offset,
+      'record_ids': instance.recordIds,
+      'data': instance.data,
+    };
+
 ModelChanged _$ModelChangedFromJson(Map<String, dynamic> json) => ModelChanged(
       model: json['model'] as String,
-      changeType: json['change_type'] as String,
-      ids: (json['ids'] as List<dynamic>?)?.map((e) => e as String).toList(),
-      data: json['data'] as Map<String, dynamic>?,
+      actions: (json['actions'] as List<dynamic>)
+          .map((e) => ModelAction.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$ModelChangedToJson(ModelChanged instance) =>
     <String, dynamic>{
       'model': instance.model,
-      'change_type': instance.changeType,
-      'ids': instance.ids,
-      'data': instance.data,
+      'actions': instance.actions,
     };

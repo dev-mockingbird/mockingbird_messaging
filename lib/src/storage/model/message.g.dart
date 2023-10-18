@@ -11,8 +11,7 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       channelId: json['channel_id'] as String,
       type: json['type'] as String,
       content: json['content'],
-      creator: Subscriber.fromJson(json['creator'] as Map<String, dynamic>),
-      readCount: json['read_count'] as int?,
+      creatorId: json['creator_id'] as String,
       prevId: json['prev_id'] as String?,
       createdAt: json['created_at'] == null
           ? null
@@ -28,8 +27,7 @@ Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
       'type': instance.type,
       'prev_id': instance.prevId,
       'content': instance.content,
-      'creator': instance.creator,
+      'creator_id': instance.creatorId,
       'created_at': instance.createdAt?.toIso8601String(),
       'updated_at': instance.updatedAt?.toIso8601String(),
-      'read_count': instance.readCount,
     };

@@ -16,17 +16,56 @@ class SubscribeRole {
 }
 
 @JsonSerializable(fieldRename: FieldRename.snake)
-class Subscriber extends NamedThumbmail {
+class Subscriber extends NamedAvatar {
   String userId;
-  int? role;
+  String? folder;
+  String channelId;
+  String? invitedBy;
+  bool online;
+  int role;
+  int unreadMessages;
+  String? lastReadMessageId;
+  DateTime? lastReadMessageAt;
+
+  static String stableName = "subscribers";
+
+  static List<String> get fields {
+    List<String> fields = NamedAvatar.fields;
+    fields.addAll([
+      "user_id TEXT",
+      "folder TEXT",
+      "channel_id TEXT",
+      "invited_by TEXT",
+      "online INTEGER",
+      "role INTEGER",
+      "unread_messages INTEGER",
+      "last_read_message_id TEXT",
+      "last_read_message_at TEXT",
+    ]);
+    return fields;
+  }
+
   Subscriber({
     required super.id,
     required this.userId,
-    this.role,
-    super.thumbnail,
+    required this.channelId,
+    this.role = SubscribeRole.roleAny,
+    this.online = false,
+    this.unreadMessages = 0,
+    this.lastReadMessageAt,
+    this.lastReadMessageId,
+    super.avatarUrl,
     super.nickname,
     super.createdAt,
   });
+
+  static List<Subscriber> fromSqlite(List<Map<String, dynamic>> data) {
+    List<Subscriber> ret = [];
+    for (var item in data) {
+      ret.add(Subscriber.fromJson(item));
+    }
+    return ret;
+  }
 
   // 反序列化
   factory Subscriber.fromJson(Map<String, dynamic> json) =>
