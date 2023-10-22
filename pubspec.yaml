@@ -18,7 +18,10 @@ dependencies:
   pointycastle:
   archive: 
   sasl_scram:
+  dio:
   uuid:
+  image_picker: ^1.0.4
+  path_provider: ^2.1.1
 
 dev_dependencies:
   flutter_test:

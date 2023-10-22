@@ -74,7 +74,7 @@ class Sqlite {
   Future<Database> getdb() async {
     if (kIsWeb) {
       databaseFactory = databaseFactoryFfiWeb;
-    } else if (Platform.isLinux) {
+    } else {
       databaseFactory = databaseFactoryFfi;
     }
     _db ??= await openDatabase(

@@ -15,7 +15,6 @@ class CreateChannel extends Payload {
     return eventType;
   }
 
-  int channelType;
   String? name;
   String? description;
   String? folder;
@@ -23,11 +22,10 @@ class CreateChannel extends Payload {
   String? thumbnail;
   int? sendMessageMaxRole;
   int? readMessageMaxRole;
-  List<String> subUserIds;
+  List<String>? subUserIds;
 
   CreateChannel({
-    required this.subUserIds,
-    required this.channelType,
+    this.subUserIds,
     this.name,
     this.description,
     this.folder,
@@ -54,22 +52,24 @@ class UpdateChannel extends Payload {
 
   String id;
   String? name;
+  bool one2one;
   String? description;
   String? folder;
   String? nickname;
-  String? thumbnail;
-  int? sendMessageMaxRole;
-  int? readMessageMaxRole;
+  String? avatarUrl;
+  int? writeMaxRole;
+  int? readMaxRole;
 
   UpdateChannel({
     required this.id,
+    required this.one2one,
     this.name,
     this.description,
     this.folder,
     this.nickname,
-    this.thumbnail,
-    this.readMessageMaxRole,
-    this.sendMessageMaxRole,
+    this.avatarUrl,
+    this.writeMaxRole,
+    this.readMaxRole,
   });
 
   factory UpdateChannel.fromJson(Map<String, dynamic> json) =>
