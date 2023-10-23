@@ -8,8 +8,8 @@ part of 'channel.dart';
 
 CreateChannel _$CreateChannelFromJson(Map<String, dynamic> json) =>
     CreateChannel(
-      subUserIds: (json['sub_user_ids'] as List<dynamic>)
-          .map((e) => e as String)
+      subUserIds: (json['sub_user_ids'] as List<dynamic>?)
+          ?.map((e) => e as String)
           .toList(),
       name: json['name'] as String?,
       description: json['description'] as String?,

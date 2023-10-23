@@ -67,6 +67,9 @@ class Miaoba extends Protocol {
       case _State.acceptAuth:
         return _acceptAuth(e);
       case _State.connected:
+        if (handler != null) {
+          return handler!.handle(e);
+        }
     }
   }
 
@@ -164,7 +167,6 @@ class Miaoba extends Protocol {
     }
     var info = ScramInfo.fromJson(e.payload!);
     var codes = base64Decode(info.info);
-    print("server returned: ${String.fromCharCodes(codes)}");
     var bs = _scramAuth!.handleMessage(_scramState!, codes);
     if (bs != null) {
       transport.send(encodePayload(ScramInfo(info: base64Encode(bs))));

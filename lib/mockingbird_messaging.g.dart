@@ -9,7 +9,7 @@ part of 'mockingbird_messaging.dart';
 SyncModelRequest _$SyncModelRequestFromJson(Map<String, dynamic> json) =>
     SyncModelRequest(
       model: json['model'] as String,
-      latestOffset: json['latest_offset'] as int,
+      latestOffset: json['latest_offset'] as int?,
     );
 
 Map<String, dynamic> _$SyncModelRequestToJson(SyncModelRequest instance) =>

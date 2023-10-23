@@ -92,7 +92,7 @@ class ModelAction {
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class ModelChanged extends Payload {
-  static const eventType = "model.changed";
+  static const eventType = "model.sync";
 
   String model;
 

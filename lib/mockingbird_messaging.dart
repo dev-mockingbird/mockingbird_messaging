@@ -5,7 +5,6 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:mockingbird_messaging/src/event/event.dart';
 import 'package:mockingbird_messaging/src/storage/sync.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:uuid/uuid.dart';
 import 'src/protocol/protocol.dart';
 import 'src/storage/kv.dart';
 import 'src/storage/model/channel.dart';
@@ -19,7 +18,7 @@ typedef ModelChangedHandler = Function(ModelChanged);
 class SyncModelRequest extends Payload {
   static const String eventType = 'model.sync';
   String model;
-  int latestOffset;
+  int? latestOffset;
 
   SyncModelRequest({required this.model, required this.latestOffset});
 
@@ -79,25 +78,24 @@ class Mockingbird extends ChangeNotifier implements EventHandler {
     notifyListeners();
   }
 
-  initialize({required Protocol proto, required Database db}) async {
-    id = await KV.get<String>("client-id");
-    if (id == '') {
-      id = const Uuid().v1();
-      await KV.save("client-id", id);
-    }
+  initialize({
+    required Protocol proto,
+    required clientId,
+    required Database db,
+  }) async {
     protocol = proto;
     this.db = db;
     proto.handler = this;
     protocol.listen();
     protocol.send(buildEvent(ConfigInfo(
-      clientId: id,
+      clientId: clientId,
       lang: _lang,
       time: DateTime.now(),
     )));
     for (var table in models) {
       protocol.send(buildEvent(SyncModelRequest(
         model: table,
-        latestOffset: await KV.get<int>(table),
+        latestOffset: await KV.get<int?>(table),
       )));
     }
   }
