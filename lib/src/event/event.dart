@@ -68,16 +68,18 @@ Event buildEvent(Payload payload) {
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class ModelAction {
-  static const String deleted = 'deleted';
-  static const String updated = 'updated';
-  static const String created = 'created';
+  static const String deleted = 'delete';
+  static const String updated = 'update';
+  static const String created = 'create';
 
+  String model;
   String action;
   int offset;
   List<String>? recordIds;
   Map<String, dynamic>? data;
 
   ModelAction({
+    required this.model,
     required this.action,
     required this.offset,
     this.recordIds,
@@ -94,11 +96,8 @@ class ModelAction {
 class ModelChanged extends Payload {
   static const eventType = "model.sync";
 
-  String model;
-
   List<ModelAction> actions;
-
-  ModelChanged({required this.model, required this.actions});
+  ModelChanged({required this.actions});
 
   @override
   String get type {

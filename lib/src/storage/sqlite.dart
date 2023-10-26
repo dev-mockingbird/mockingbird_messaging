@@ -11,7 +11,6 @@ import 'package:sqflite/sqflite.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'dart:io' show Platform;
 
 import 'model/contact.dart';
 import 'model/subscriber.dart';
@@ -77,11 +76,13 @@ class Sqlite {
     } else {
       databaseFactory = databaseFactoryFfi;
     }
-    _db ??= await openDatabase(
-        join(await getDatabasesPath(), 'mockingbird_database.db'),
-        version: 8,
-        onCreate: _initDatabase,
-        onUpgrade: _upgrade);
+    if (_db != null) {
+      return _db!;
+    }
+    var path = await getDatabasesPath();
+    print("database db path: $path");
+    _db = await openDatabase(join(path, 'mockingbird_database.db'),
+        version: 8, onCreate: _initDatabase, onUpgrade: _upgrade);
     return _db!;
   }
 
@@ -90,22 +91,16 @@ class Sqlite {
   }
 
   _initDatabase(Database db, version) async {
-    Future.wait([
-      db.execute(
-        "CREATE TABLE ${Channel.stableName}(${Channel.fields.join(",")})",
-      ),
-      db.execute(
-        "CREATE TABLE ${Message.stableName}(${Message.fields.join(",")})",
-      ),
-      db.execute(
-        "CREATE TABLE ${User.stableName}(${User.fields.join(",")})",
-      ),
-      db.execute(
-        "CREATE TABLE ${Contact.stableName}(${Contact.fields.join(",")})",
-      ),
-      db.execute(
-        "CREATE TABLE ${Subscriber.stableName}(${Subscriber.fields.join(",")})",
-      )
-    ]);
+    var sqls = [
+      "CREATE TABLE ${Channel.stableName}(${Channel.fields.join(",")})",
+      "CREATE TABLE ${Message.stableName}(${Message.fields.join(",")})",
+      "CREATE TABLE ${User.stableName}(${User.fields.join(",")})",
+      "CREATE TABLE ${Contact.stableName}(${Contact.fields.join(",")})",
+      "CREATE TABLE ${Subscriber.stableName}(${Subscriber.fields.join(",")})",
+    ];
+    for (var sql in sqls) {
+      print(sql);
+      await db.execute(sql);
+    }
   }
 }

@@ -6,7 +6,6 @@ import 'package:mockingbird_messaging/src/event/event.dart';
 import 'package:mockingbird_messaging/src/storage/sync.dart';
 import 'package:sqflite/sqflite.dart';
 import 'src/protocol/protocol.dart';
-import 'src/storage/kv.dart';
 import 'src/storage/model/channel.dart';
 import 'src/storage/model/contact.dart';
 import 'src/storage/model/message.dart';
@@ -92,12 +91,12 @@ class Mockingbird extends ChangeNotifier implements EventHandler {
       lang: _lang,
       time: DateTime.now(),
     )));
-    for (var table in models) {
-      protocol.send(buildEvent(SyncModelRequest(
-        model: table,
-        latestOffset: await KV.get<int?>(table),
-      )));
-    }
+    // for (var table in models) {
+    //   protocol.send(buildEvent(SyncModelRequest(
+    //     model: table,
+    //     latestOffset: await KV.get<int?>(table),
+    //   )));
+    // }
   }
 
   _changeLanguage(String lang) {}

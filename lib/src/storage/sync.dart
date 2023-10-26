@@ -8,6 +8,13 @@ import 'package:sqflite/sqflite.dart';
 import '../event/event.dart';
 
 class SyncDB {
+  static const persistances = [
+    "channels",
+    "subscribers",
+    "messages",
+    "users",
+    "contacts",
+  ];
   Database db;
   SyncDB({
     required this.db,
@@ -15,13 +22,16 @@ class SyncDB {
 
   applyEvent(ModelChanged event) async {
     for (var action in event.actions) {
-      switch (event.type) {
+      if (!persistances.contains(action.action)) {
+        continue;
+      }
+      switch (action.action) {
         case ModelAction.deleted:
-          await _delete(event.model, action);
+          await _delete(action.model, action);
         case ModelAction.updated:
-          await _update(event.model, action);
+          await _update(action.model, action);
         case ModelAction.created:
-          await _create(event.model, action);
+          await _create(action.model, action);
         default:
         // warning here
       }
@@ -33,7 +43,59 @@ class SyncDB {
       // warning here
       return;
     }
-    await db.insert(model, event.data!);
+    await db.insert(model, _fixData(event.data!),
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Map<String, dynamic> _fixNullableColumn(
+    Map<String, dynamic> data,
+    String name,
+  ) {
+    if (data[name] == null) {
+      return data;
+    }
+    if (data[name]["Valid"] ?? false) {
+      data[name] = data[name]["Time"];
+    } else {
+      data[name] = null;
+    }
+    return data;
+  }
+
+  Map<String, dynamic> _fixBooleanColumn(
+    Map<String, dynamic> data,
+    String name,
+  ) {
+    if (data[name] == null || data[name] is! bool) {
+      return data;
+    }
+    if (data[name]) {
+      data[name] = 1;
+    } else {
+      data[name] = 0;
+    }
+    return data;
+  }
+
+  Map<String, dynamic> _dropColumn(
+    Map<String, dynamic> data,
+    String name,
+  ) {
+    data.remove(name);
+    return data;
+  }
+
+  Map<String, dynamic> _fixData(Map<String, dynamic> data) {
+    for (var col in ['last_read_message_at', 'last_message_at']) {
+      data = _fixNullableColumn(data, col);
+    }
+    for (var col in ['online']) {
+      data = _fixBooleanColumn(data, col);
+    }
+    for (var col in ['deleted_at']) {
+      data = _dropColumn(data, col);
+    }
+    return data;
   }
 
   _update(String model, ModelAction event) async {
@@ -43,9 +105,9 @@ class SyncDB {
     }
     await db.update(
       model,
-      event.data!,
-      where: "id IN ?",
-      whereArgs: [event.recordIds],
+      _fixData(event.data!),
+      where: "id IN (${event.recordIds!.map((v) => '?').join(',')})",
+      whereArgs: event.recordIds,
     );
   }
 
@@ -54,11 +116,10 @@ class SyncDB {
       // warning here
       return;
     }
-    List<dynamic> whereArgs = [event.recordIds];
     await db.delete(
       model,
-      where: "id IN ?",
-      whereArgs: whereArgs,
+      where: "id IN (${event.recordIds!.map((v) => '?').join(',')})",
+      whereArgs: event.recordIds,
     );
   }
 }

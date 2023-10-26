@@ -23,6 +23,7 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
     };
 
 ModelAction _$ModelActionFromJson(Map<String, dynamic> json) => ModelAction(
+      model: json['model'] as String,
       action: json['action'] as String,
       offset: json['offset'] as int,
       recordIds: (json['record_ids'] as List<dynamic>?)
@@ -33,6 +34,7 @@ ModelAction _$ModelActionFromJson(Map<String, dynamic> json) => ModelAction(
 
 Map<String, dynamic> _$ModelActionToJson(ModelAction instance) =>
     <String, dynamic>{
+      'model': instance.model,
       'action': instance.action,
       'offset': instance.offset,
       'record_ids': instance.recordIds,
@@ -40,7 +42,6 @@ Map<String, dynamic> _$ModelActionToJson(ModelAction instance) =>
     };
 
 ModelChanged _$ModelChangedFromJson(Map<String, dynamic> json) => ModelChanged(
-      model: json['model'] as String,
       actions: (json['actions'] as List<dynamic>)
           .map((e) => ModelAction.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -48,6 +49,5 @@ ModelChanged _$ModelChangedFromJson(Map<String, dynamic> json) => ModelChanged(
 
 Map<String, dynamic> _$ModelChangedToJson(ModelChanged instance) =>
     <String, dynamic>{
-      'model': instance.model,
       'actions': instance.actions,
     };

@@ -9,7 +9,7 @@ part 'message.g.dart';
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class CreateMessage extends Payload {
-  static const String eventType = "message.create";
+  static const String eventType = "channel.message.create";
   @override
   String get type => eventType;
 
@@ -32,7 +32,7 @@ class CreateMessage extends Payload {
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class UpdateMessage extends Payload {
-  static const String eventType = "message.update";
+  static const String eventType = "channel.message.update";
   @override
   String get type => eventType;
 
@@ -55,7 +55,7 @@ class UpdateMessage extends Payload {
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class DeleteMessage extends Payload {
-  static const String eventType = "message.delete";
+  static const String eventType = "channel.message.delete";
   @override
   String get type => eventType;
 

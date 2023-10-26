@@ -27,7 +27,7 @@ class NamedAvatar {
       "name TEXT",
       "nickname TEXT",
       "avatar_url TEXT",
-      "craeted_at TEXT",
+      "created_at TEXT",
     ];
   }
 

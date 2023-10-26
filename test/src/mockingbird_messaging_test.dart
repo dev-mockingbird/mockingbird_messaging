@@ -9,6 +9,7 @@ import 'package:mockingbird_messaging/mockingbird_messaging.dart';
 import 'package:mockingbird_messaging/src/encoding/encoding.dart';
 import 'package:mockingbird_messaging/src/event/channel.dart';
 import 'package:mockingbird_messaging/src/event/event.dart';
+import 'package:mockingbird_messaging/src/event/message.dart';
 import 'package:mockingbird_messaging/src/http_helper.dart';
 import 'package:mockingbird_messaging/src/protocol/miaoba/miaoba.dart';
 import 'package:mockingbird_messaging/src/protocol/miaoba/server_options.dart';
@@ -64,6 +65,18 @@ void main() async {
       Mockingbird mockingbird =
           await installService("MDAwMDA0eWVnMG1jYnFwcw==");
       mockingbird.protocol.send(buildEvent(CreateChannel()));
+      await Future.delayed(const Duration(hours: 1));
+    });
+    test("send message", () async {
+      SharedPreferences.setMockInitialValues({});
+      WidgetsFlutterBinding.ensureInitialized();
+      Mockingbird mockingbird =
+          await installService("MDAwMDA0eWVnMG1jYnFwcw==");
+      mockingbird.protocol.send(buildEvent(CreateMessage(
+        channelId: "000005302j4jaygw",
+        content: "hello world",
+        contentType: "text",
+      )));
       await Future.delayed(const Duration(hours: 1));
     });
   });

@@ -35,7 +35,6 @@ abstract class Transport extends ChangeNotifier {
       packet = await ls[i].encode(packet);
     }
     var s = base64Encode(packet);
-    print("send: $s");
     return await sendPacket(Uint8List.fromList(s.codeUnits));
   }
 
