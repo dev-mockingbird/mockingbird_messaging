@@ -23,32 +23,41 @@ enum PassType {
   verifyCode,
 }
 
-typedef Token = String;
+class LoginUser {
+  String token;
+  User user;
+  LoginUser({required this.token, required this.user});
+}
 
 abstract class UserManager {
-  Future<Token> signup(
+  Future<LoginUser?> signup(
     String username,
     String contact,
     ContactType contactType,
     String verifyCode,
-    String password,
-  );
-  Future<Token> login(
+    String password, {
+    HandleError? onError,
+  });
+  Future<LoginUser?> login(
     String account,
     AccountType accountType,
     PassType passType,
-    String passcode,
-  );
-  Future<void> signout();
+    String passcode, {
+    HandleError? onError,
+  });
 
-  Future<List<User>> search(String keyword);
+  Future<bool> signout();
 
-  Future<void> sendVerifyCode(ContactType contactType, String contact);
-  Future<AccountType> verifyAccount(String account);
-  Future<void> changePasswordByOldPassword(String password, String oldPassword);
+  Future<List<User>?> search(String keyword);
 
-  Future<void> changePasswordByVerifyCode(String password,
-      ContactType contactType, String contact, String verifyCode);
+  Future<bool> sendVerifyCode(ContactType contactType, String contact);
+  Future<AccountType?> verifyAccount(String account, {HandleError? onError});
+  Future<bool> changePasswordByOldPassword(String password, String oldPassword,
+      {HandleError? onError});
+
+  Future<bool> changePasswordByVerifyCode(String password,
+      ContactType contactType, String contact, String verifyCode,
+      {HandleError? onError});
 }
 
 class HttpUserManager extends UserManager {
@@ -71,35 +80,50 @@ class HttpUserManager extends UserManager {
   DioHelper helper;
   HttpUserManager({required this.helper});
   @override
-  Future<void> changePasswordByOldPassword(
-      String password, String oldPassword) async {
-    await helper.put("/password/by-old-password", data: {
-      "old_password": oldPassword,
-      "new_password": password,
-    });
+  Future<bool> changePasswordByOldPassword(String password, String oldPassword,
+      {HandleError? onError}) async {
+    return await helper.put("/password/by-old-password",
+            data: {
+              "old_password": oldPassword,
+              "new_password": password,
+            },
+            showError: onError) !=
+        null;
   }
 
   @override
-  Future<void> changePasswordByVerifyCode(String password,
-      ContactType contactType, String contact, String verifyCode) async {
-    await helper.put("/password/by-verify-code", data: {
-      "new_password": password,
-      "contact_type": contactTypes[contactType],
-      "contact": contact,
-      "verify_code": verifyCode,
-    });
+  Future<bool> changePasswordByVerifyCode(String password,
+      ContactType contactType, String contact, String verifyCode,
+      {HandleError? onError}) async {
+    return await helper.put("/password/by-verify-code",
+            data: {
+              "new_password": password,
+              "contact_type": contactTypes[contactType],
+              "contact": contact,
+              "verify_code": verifyCode,
+            },
+            showError: onError) !=
+        null;
   }
 
   @override
-  Future<Token> login(String account, AccountType accountType,
-      PassType passType, String passcode) async {
-    var res = await helper.post("/signin", data: {
-      "account_type": accountTypes[accountType],
-      "account": account,
-      "pass_type": passTypes[passType],
-      "passcode": passcode,
-    });
-    return res['data']['token'];
+  Future<LoginUser?> login(String account, AccountType accountType,
+      PassType passType, String passcode,
+      {HandleError? onError}) async {
+    var res = await helper.post("/signin",
+        data: {
+          "account_type": accountTypes[accountType],
+          "account": account,
+          "pass_type": passTypes[passType],
+          "passcode": passcode,
+        },
+        showError: onError);
+    if (res != null) {
+      return LoginUser(
+          token: res['data']['token'],
+          user: User.fromJson(res['data']['user']));
+    }
+    return null;
   }
 
   @override
@@ -113,20 +137,22 @@ class HttpUserManager extends UserManager {
   }
 
   @override
-  Future<void> sendVerifyCode(ContactType contactType, String contact) async {
-    await helper.post('/verify-code/${contactTypes[contactType]}/$contact');
+  Future<bool> sendVerifyCode(ContactType contactType, String contact) async {
+    return await helper
+            .post('/verify-code/${contactTypes[contactType]}/$contact') !=
+        null;
   }
 
   @override
-  Future<void> signout() async {
-    await helper.post("/signout");
+  Future<bool> signout() async {
+    return await helper.post("/signout") != null;
   }
 
   @override
-  Future<Token> signup(String username, String contact, ContactType contactType,
-      String verifyCode, String password,
-      {Function(dynamic)? onError}) async {
-    return await helper.post('/signup',
+  Future<LoginUser?> signup(String username, String contact,
+      ContactType contactType, String verifyCode, String password,
+      {HandleError? onError}) async {
+    var res = await helper.post('/signup',
         data: {
           "name": username,
           "contact": contact,
@@ -135,20 +161,31 @@ class HttpUserManager extends UserManager {
           "password": password,
         },
         showError: onError);
+    if (res != null) {
+      return LoginUser(
+        token: res['data']['token'],
+        user: User.fromJson(res['data']['user']),
+      );
+    }
+    return null;
   }
 
   @override
-  Future<AccountType> verifyAccount(String account) async {
-    var res = await helper.get("/accounts/$account");
-    switch (res["data"]["type"]) {
-      case "email":
-        return AccountType.email;
-      case "phone_number":
-        return AccountType.phoneNumber;
-      case "username":
-        return AccountType.username;
-      default:
-        return AccountType.unkown;
+  Future<AccountType?> verifyAccount(String account,
+      {HandleError? onError}) async {
+    var res = await helper.get("/accounts/$account", onError: onError);
+    if (res != null) {
+      switch (res["data"]["type"]) {
+        case "email":
+          return AccountType.email;
+        case "phone_number":
+          return AccountType.phoneNumber;
+        case "username":
+          return AccountType.username;
+        default:
+          return AccountType.unkown;
+      }
     }
+    return null;
   }
 }

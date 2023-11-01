@@ -14,7 +14,7 @@ abstract class Protocol {
   EventHandler? handler;
   Protocol({required this.encoding});
   send(Event event);
-  listen();
+  Future listen();
 
   @protected
   Packet encode(Event data) {

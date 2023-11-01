@@ -3,6 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
+import 'package:mockingbird_messaging/src/storage/model/model_sync.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../event/event.dart';
@@ -20,10 +21,19 @@ class SyncDB {
     required this.db,
   });
 
-  applyEvent(ModelChanged event) async {
+  applyEvent(String userId, ModelChanged event) async {
+    Map<String, String> lastUpdated = {};
     for (var action in event.actions) {
-      if (!persistances.contains(action.action)) {
+      if (!persistances.contains(action.model)) {
         continue;
+      }
+      var updatedAt = action.data?["updated_at"];
+      if (updatedAt != null) {
+        if (lastUpdated[action.model] == null) {
+          lastUpdated[action.model] = updatedAt;
+        } else if (lastUpdated[action.model]!.compareTo(updatedAt) < 0) {
+          lastUpdated[action.model] = updatedAt;
+        }
       }
       switch (action.action) {
         case ModelAction.deleted:
@@ -35,6 +45,16 @@ class SyncDB {
         default:
         // warning here
       }
+      lastUpdated.keys.forEach((m) {
+        db.insert(
+            ModelSync.stableName,
+            {
+              "model": m,
+              "user_id": userId,
+              "last_updated_at": lastUpdated[m],
+            },
+            conflictAlgorithm: ConflictAlgorithm.replace);
+      });
     }
   }
 

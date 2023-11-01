@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'mockingbird_messaging.dart';
+part of 'mockingbird.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
@@ -9,13 +9,15 @@ part of 'mockingbird_messaging.dart';
 SyncModelRequest _$SyncModelRequestFromJson(Map<String, dynamic> json) =>
     SyncModelRequest(
       model: json['model'] as String,
-      latestOffset: json['latest_offset'] as int?,
+      userId: json['user_id'] as String,
+      lastUpdatedAt: json['last_updated_at'] as String,
     );
 
 Map<String, dynamic> _$SyncModelRequestToJson(SyncModelRequest instance) =>
     <String, dynamic>{
       'model': instance.model,
-      'latest_offset': instance.latestOffset,
+      'last_updated_at': instance.lastUpdatedAt,
+      'user_id': instance.userId,
     };
 
 ConfigInfo _$ConfigInfoFromJson(Map<String, dynamic> json) => ConfigInfo(

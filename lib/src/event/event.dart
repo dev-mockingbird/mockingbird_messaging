@@ -74,14 +74,12 @@ class ModelAction {
 
   String model;
   String action;
-  int offset;
   List<String>? recordIds;
   Map<String, dynamic>? data;
 
   ModelAction({
     required this.model,
     required this.action,
-    required this.offset,
     this.recordIds,
     this.data,
   });

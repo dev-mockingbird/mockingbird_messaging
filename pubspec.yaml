@@ -1,7 +1,7 @@
 name: mockingbird_messaging
-description: A new Flutter package project.
-version: 0.0.1
-homepage: none
+description: A Instant Messaging utils.
+version: 0.0.7
+homepage: https://github.com/dev-mockingbird/mockingbird_messaging
 
 environment:
   sdk: '>=3.0.2 <4.0.0'
@@ -11,15 +11,19 @@ dependencies:
   flutter:
     sdk: flutter
   json_annotation: ^4.8.1
-  sqflite_common_ffi_web:
-  sqflite:
+  sqflite_common_ffi_web: ^0.4.0
+  sqflite_common_ffi: ^2.3.0+2
+  sqflite: ^2.3.0
+  path: ^1.8.3
   shared_preferences: ^2.2.1
-  cryptography:
-  pointycastle:
-  archive: 
-  sasl_scram:
-  dio:
-  uuid:
+  cryptography: ^2.7.0
+  pointycastle: ^3.7.3
+  archive: ^3.4.5
+  web_socket_channel: ^2.4.0
+  crypto: ^3.0.3
+  sasl_scram: ^0.1.1
+  dio: ^5.3.3
+  uuid: ^3.0.7
   image_picker: ^1.0.4
   path_provider: ^2.1.1
 

@@ -8,6 +8,29 @@ import 'event.dart';
 part 'channel.g.dart';
 
 @JsonSerializable(fieldRename: FieldRename.snake)
+class Typing extends Payload {
+  static const String eventType = "channel.typing";
+  String channelId;
+  String contentType;
+  String content;
+
+  Typing({
+    required this.channelId,
+    required this.contentType,
+    required this.content,
+  });
+  @override
+  String get type {
+    return eventType;
+  }
+
+  factory Typing.fromJson(Map<String, dynamic> json) => _$TypingFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$TypingToJson(this);
+}
+
+@JsonSerializable(fieldRename: FieldRename.snake)
 class CreateChannel extends Payload {
   static const String eventType = 'channel.create';
   @override

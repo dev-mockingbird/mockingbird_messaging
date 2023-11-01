@@ -3,8 +3,6 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
@@ -72,14 +70,10 @@ class DioHelper {
     Options? options,
     HandleError? onError,
   }) async {
-    try {
-      return _handleData(() async {
-        var dio = await getDio();
-        return await dio.get(path, queryParameters: data, options: options);
-      });
-    } catch (e) {
-      _errorHandler(e, onError);
-    }
+    return await _do(() async {
+      var dio = await getDio();
+      return await dio.get(path, queryParameters: data, options: options);
+    }, onError);
   }
 
   // post
@@ -89,27 +83,10 @@ class DioHelper {
     Options? options,
     HandleError? showError,
   }) async {
-    try {
-      return await _handleData(() async {
-        var dio = await getDio();
-        return await dio.post(path, data: data, options: options);
-      });
-    } catch (e) {
-      _errorHandler(e, showError);
-    }
-  }
-
-  _handleData(Future<Response> Function() d) async {
-    var res = await d();
-    return res.data;
-  }
-
-  _do(Future Function() d, {HandleError? showError}) async {
-    try {
-      return await d();
-    } on DioException catch (e) {
-      _errorHandler(e, showError);
-    }
+    return await _do(() async {
+      var dio = await getDio();
+      return await dio.post(path, data: data, options: options);
+    }, showError);
   }
 
   // put
@@ -119,14 +96,10 @@ class DioHelper {
     Options? options,
     HandleError? showError,
   }) async {
-    try {
-      return _handleData(() async {
-        var dio = await getDio();
-        return await dio.put(path, data: data, options: options);
-      });
-    } catch (e) {
-      _errorHandler(e, showError);
-    }
+    return await _do(() async {
+      var dio = await getDio();
+      return await dio.put(path, data: data, options: options);
+    }, showError);
   }
 
   // delete
@@ -136,14 +109,10 @@ class DioHelper {
     Options? options,
     HandleError? showError,
   }) async {
-    try {
-      return _handleData(() async {
-        var dio = await getDio();
-        return await dio.delete(path, data: data, options: options);
-      });
-    } catch (e) {
-      _errorHandler(e, showError);
-    }
+    return await _do(() async {
+      var dio = await getDio();
+      return await dio.delete(path, data: data, options: options);
+    }, showError);
   }
 
   // upload
@@ -154,14 +123,10 @@ class DioHelper {
     return await _do(() async {
       var uploader = await dioUpload();
       if (method == "post") {
-        Response res =
-            await uploader.post(path, data: data, onSendProgress: onSent);
-        return jsonDecode(res.data);
+        return await uploader.post(path, data: data, onSendProgress: onSent);
       }
-      Response res =
-          await uploader.put(path, data: data, onSendProgress: onSent);
-      return jsonDecode(res.data);
-    }, showError: showError);
+      return await uploader.put(path, data: data, onSendProgress: onSent);
+    }, showError);
   }
 
   // download
@@ -173,9 +138,9 @@ class DioHelper {
     Options? options,
     HandleError? showError,
   }) async {
-    var dio = await getDio();
-    try {
-      Response response = await dio.download(
+    return await _do(() async {
+      var dio = await getDio();
+      return await dio.download(
         path,
         savePath,
         data: data,
@@ -186,9 +151,16 @@ class DioHelper {
           }
         },
       );
-      return response.data;
-    } on DioException catch (e) {
-      _errorHandler(e, showError);
+    }, showError);
+  }
+
+  Future<dynamic> _do(
+      Future<Response> Function() d, HandleError? handleError) async {
+    try {
+      Response res = await d();
+      return res.data;
+    } catch (e) {
+      _errorHandler(e, handleError);
     }
   }
 

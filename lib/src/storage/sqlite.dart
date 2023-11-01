@@ -13,6 +13,7 @@ import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import 'model/contact.dart';
+import 'model/model_sync.dart';
 import 'model/subscriber.dart';
 import 'model/user.dart';
 
@@ -97,6 +98,7 @@ class Sqlite {
       "CREATE TABLE ${User.stableName}(${User.fields.join(",")})",
       "CREATE TABLE ${Contact.stableName}(${Contact.fields.join(",")})",
       "CREATE TABLE ${Subscriber.stableName}(${Subscriber.fields.join(",")})",
+      "CREATE TABLE ${ModelSync.stableName}(${ModelSync.fields.join(",")})",
     ];
     for (var sql in sqls) {
       print(sql);

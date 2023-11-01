@@ -3,6 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:mockingbird_messaging/src/event/event.dart';
@@ -29,8 +30,10 @@ class Miaoba extends Protocol {
   _State _state = _State.init;
   SaslMessageType? _scramState = SaslMessageType.AuthenticationSASL;
   Authenticator? _scramAuth;
+  final Completer _handshake;
   late ServerOptions opt;
   late AsymmetricKeyPair<PublicKey, PrivateKey> clientKeyPair;
+  bool _listening = false;
   final String? cryptoMethod;
   final String? scramMethod;
   final String? compressMethod;
@@ -47,12 +50,17 @@ class Miaoba extends Protocol {
     this.token,
     this.username,
     this.password,
-  });
+  }) : _handshake = Completer();
 
   @override
-  listen() {
+  Future listen() {
+    if (_listening) {
+      return _handshake.future;
+    }
+    _listening = true;
     transport.addEventHandler(handle);
     transport.listen();
+    return _handshake.future;
   }
 
   Future handle(Packet payload, Transport t) async {
@@ -65,7 +73,8 @@ class Miaoba extends Protocol {
       case _State.acceptCompress:
         return _acceptCompress(e);
       case _State.acceptAuth:
-        return _acceptAuth(e);
+        _acceptAuth(e);
+        _handshake.complete();
       case _State.connected:
         if (handler != null) {
           return handler!.handle(e);
