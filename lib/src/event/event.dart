@@ -41,8 +41,10 @@ class Event {
     var encoding = metadata?['encoding'] ?? 'json';
     switch (encoding) {
       case 'json':
-        payload = jsonDecode(
-            String.fromCharCodes(base64Decode(utf8.decode(data!.codeUnits))));
+        if (data != null) {
+          payload = jsonDecode(utf8.decode(base64Decode(data!)));
+          return;
+        }
       default:
         throw Exception("unexpected encoding $encoding");
     }

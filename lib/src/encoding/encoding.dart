@@ -18,12 +18,13 @@ class JsonEncoding extends Encoding {
   @override
   Packet encode(Event event) {
     event.packPayload();
-    return Uint8List.fromList(jsonEncode(event).codeUnits);
+    return Uint8List.fromList(utf8.encode(jsonEncode(event)));
   }
 
   @override
   Event decode(Packet payload) {
-    var event = Event.fromJson(jsonDecode(String.fromCharCodes(payload)));
+    var utf8Encoded = utf8.decode(payload);
+    var event = Event.fromJson(jsonDecode(utf8Encoded));
     event.unpackPayload();
     return event;
   }

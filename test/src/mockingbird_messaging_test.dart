@@ -95,7 +95,7 @@ void main() async {
           await installService("MDAwMDA0eWVnMG1jYnFwcw==");
       mockingbird.protocol.send(buildEvent(CreateMessage(
         channelId: "000005302j4jaygw",
-        content: "hello world",
+        content: "你好",
         contentType: "text",
       )));
       await Future.delayed(const Duration(hours: 1));
@@ -104,10 +104,10 @@ void main() async {
       SharedPreferences.setMockInitialValues({});
       WidgetsFlutterBinding.ensureInitialized();
       Mockingbird mockingbird =
-          await installService("MDAwMDA0eWVnMG1jYnFwcw==");
+          await installService("MDAwMDA1ZDhmcmJrMnB6NA==");
       mockingbird.protocol.send(buildEvent(Typing(
         channelId: "000005302j4jaygw",
-        content: "hello world",
+        content: "你好",
         contentType: "text",
       )));
       await Future.delayed(const Duration(hours: 1));
