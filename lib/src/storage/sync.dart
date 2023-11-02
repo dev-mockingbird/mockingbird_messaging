@@ -45,16 +45,16 @@ class SyncDB {
         default:
         // warning here
       }
-      lastUpdated.keys.forEach((m) {
-        db.insert(
-            ModelSync.stableName,
-            {
-              "model": m,
-              "user_id": userId,
-              "last_updated_at": lastUpdated[m],
-            },
-            conflictAlgorithm: ConflictAlgorithm.replace);
-      });
+    }
+    for (var m in lastUpdated.keys) {
+      db.insert(
+          ModelSync.stableName,
+          {
+            "model": m,
+            "user_id": userId,
+            "last_updated_at": lastUpdated[m],
+          },
+          conflictAlgorithm: ConflictAlgorithm.replace);
     }
   }
 

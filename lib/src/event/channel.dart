@@ -121,3 +121,18 @@ class DeleteChannel extends Payload {
   @override
   Map<String, dynamic> toJson() => _$DeleteChannelToJson(this);
 }
+
+@JsonSerializable(fieldRename: FieldRename.snake)
+class UpdateChannelFolder extends Payload {
+  static const String eventType = "channel.folder.update";
+  List<String> channelIds;
+  String folder;
+  UpdateChannelFolder({required this.channelIds, required this.folder});
+  @override
+  Map<String, dynamic> toJson() => _$UpdateChannelFolderToJson(this);
+
+  factory UpdateChannelFolder.fromJson(Map<String, dynamic> json) =>
+      _$UpdateChannelFolderFromJson(json);
+  @override
+  String get type => eventType;
+}

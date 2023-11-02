@@ -16,7 +16,6 @@ class Channel extends SqliteModel {
   String? avatarUrl;
   String? description;
   String? peerUserId;
-  String? folder;
   int writeMaxRole;
   int readMaxRole;
   int messages;
@@ -37,7 +36,6 @@ class Channel extends SqliteModel {
     "nickname TEXT",
     "avatar_url TEXT",
     "description TEXT",
-    "folder TEXT",
     "write_max_role INTEGER",
     "read_max_role INTEGER",
     "peer_user_id TEXT",
@@ -69,7 +67,6 @@ class Channel extends SqliteModel {
     this.avatarUrl,
     this.peerUserId,
     this.lastMessage,
-    this.folder,
     this.description,
     this.messages = 0,
     this.subscribers = 0,

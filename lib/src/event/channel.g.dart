@@ -79,3 +79,18 @@ Map<String, dynamic> _$DeleteChannelToJson(DeleteChannel instance) =>
     <String, dynamic>{
       'id': instance.id,
     };
+
+UpdateChannelFolder _$UpdateChannelFolderFromJson(Map<String, dynamic> json) =>
+    UpdateChannelFolder(
+      channelIds: (json['channel_ids'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList(),
+      folder: json['folder'] as String,
+    );
+
+Map<String, dynamic> _$UpdateChannelFolderToJson(
+        UpdateChannelFolder instance) =>
+    <String, dynamic>{
+      'channel_ids': instance.channelIds,
+      'folder': instance.folder,
+    };

@@ -112,5 +112,16 @@ void main() async {
       )));
       await Future.delayed(const Duration(hours: 1));
     });
+    test("move to folder", () async {
+      SharedPreferences.setMockInitialValues({});
+      WidgetsFlutterBinding.ensureInitialized();
+      Mockingbird mockingbird =
+          await installService("MDAwMDA0eWVnMG1jYnFwcw==");
+      mockingbird.protocol.send(buildEvent(UpdateChannelFolder(
+        channelIds: ["000005302j4jaygw"],
+        folder: "Hello World",
+      )));
+      await Future.delayed(const Duration(hours: 1));
+    });
   });
 }

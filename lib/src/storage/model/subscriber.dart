@@ -41,6 +41,7 @@ class Subscriber extends NamedAvatar {
       "unread_messages INTEGER",
       "last_read_message_id TEXT",
       "last_read_message_at TEXT",
+      "updated_at TEXT",
     ]);
     return fields;
   }
