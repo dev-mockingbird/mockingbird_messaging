@@ -19,6 +19,7 @@ typedef TransportEventHandler = Future Function(Packet packet, Transport t);
 abstract class Transport extends ChangeNotifier {
   List<TransportEventHandler> handlers = [];
   List<Layer> layers = [];
+  set onDone(VoidCallback? onDone);
   addEventHandler(TransportEventHandler handler) {
     handlers.add(handler);
   }
@@ -38,18 +39,22 @@ abstract class Transport extends ChangeNotifier {
     return await sendPacket(Uint8List.fromList(s.codeUnits));
   }
 
-  Future sendPacket(Packet packet);
+  Future<bool> sendPacket(Packet packet);
 
   Future close();
 
   @protected
   Future handle(Packet packet, Transport sc) async {
-    packet = base64Decode(String.fromCharCodes(packet));
-    for (var i = layers.length - 1; i >= 0; i--) {
-      packet = await layers[i].decode(packet);
-    }
-    for (var handler in handlers) {
-      handler(packet, this);
+    try {
+      packet = base64Decode(String.fromCharCodes(packet));
+      for (var i = layers.length - 1; i >= 0; i--) {
+        packet = await layers[i].decode(packet);
+      }
+      for (var handler in handlers) {
+        handler(packet, this);
+      }
+    } catch (e) {
+      print("handle event: $e");
     }
   }
 

@@ -9,12 +9,20 @@ import 'package:mockingbird_messaging/src/event/event.dart';
 import '../encoding/encoding.dart';
 import '../transport/transport.dart';
 
-abstract class Protocol {
+enum ConnectState {
+  unconnect,
+  connecting,
+  connected,
+}
+
+abstract class Protocol extends ChangeNotifier {
   Encoding encoding;
   EventHandler? handler;
   Protocol({required this.encoding});
   send(Event event);
   Future listen();
+  set onConnected(Future Function() onConnected);
+  ConnectState get state;
 
   @protected
   Packet encode(Event data) {

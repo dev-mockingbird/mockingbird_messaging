@@ -6,6 +6,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:mockingbird_messaging/src/event/event.dart';
 import 'package:mockingbird_messaging/src/protocol/protocol.dart';
 import 'package:mockingbird_messaging/src/transport/encrypt.dart';
@@ -34,6 +35,8 @@ class Miaoba extends Protocol {
   late ServerOptions opt;
   late AsymmetricKeyPair<PublicKey, PrivateKey> clientKeyPair;
   bool _listening = false;
+  bool _connected = false;
+  Future Function()? onConnected;
   final String? cryptoMethod;
   final String? scramMethod;
   final String? compressMethod;
@@ -44,6 +47,7 @@ class Miaoba extends Protocol {
   Miaoba({
     required this.transport,
     required super.encoding,
+    this.onConnected,
     this.cryptoMethod,
     this.compressMethod,
     this.scramMethod,
@@ -53,11 +57,31 @@ class Miaoba extends Protocol {
   }) : _handshake = Completer();
 
   @override
+  ConnectState get state {
+    if (_connected) {
+      return ConnectState.connected;
+    } else if (_listening && !_connected) {
+      return ConnectState.connecting;
+    }
+    return ConnectState.unconnect;
+  }
+
+  @override
   Future listen() {
     if (_listening) {
       return _handshake.future;
     }
     _listening = true;
+    notifyListeners();
+    transport.onDone = () {
+      _state = _State.init;
+      _connected = false;
+      _listening = false;
+      notifyListeners();
+      transport.layers.clear();
+      Future.delayed(const Duration(seconds: 1))
+          .then((value) => transport.listen());
+    };
     transport.addEventHandler(handle);
     transport.listen();
     return _handshake.future;
@@ -74,7 +98,14 @@ class Miaoba extends Protocol {
         return _acceptCompress(e);
       case _State.acceptAuth:
         _acceptAuth(e);
-        _handshake.complete();
+        _connected = true;
+        if (onConnected != null) {
+          await onConnected!();
+        }
+        if (!_handshake.isCompleted) {
+          _handshake.complete();
+        }
+        notifyListeners();
       case _State.connected:
         if (handler != null) {
           return handler!.handle(e);
@@ -83,8 +114,12 @@ class Miaoba extends Protocol {
   }
 
   @override
-  send(Event event) {
-    return transport.send(encoding.encode(event));
+  Future<bool> send(Event event) async {
+    if (_connected) {
+      await transport.send(encoding.encode(event));
+      return true;
+    }
+    return false;
   }
 
   _acceptCrypto(Event e) async {
@@ -126,7 +161,6 @@ class Miaoba extends Protocol {
       throw Exception("compress $cm not supported");
     }
     transport.send(encodePayload(AcceptCompress(compressMethod: cm)));
-
     _state = _State.acceptCompress;
   }
 

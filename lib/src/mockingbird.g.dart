@@ -32,3 +32,12 @@ Map<String, dynamic> _$ConfigInfoToJson(ConfigInfo instance) =>
       'client_id': instance.clientId,
       'time': instance.time.toIso8601String(),
     };
+
+ChangeLang _$ChangeLangFromJson(Map<String, dynamic> json) => ChangeLang(
+      lang: json['lang'] as String,
+    );
+
+Map<String, dynamic> _$ChangeLangToJson(ChangeLang instance) =>
+    <String, dynamic>{
+      'lang': instance.lang,
+    };

@@ -3,6 +3,8 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -14,6 +16,7 @@ import 'package:mockingbird_messaging/src/event/message.dart';
 import 'package:mockingbird_messaging/src/http_helper.dart';
 import 'package:mockingbird_messaging/src/protocol/miaoba/miaoba.dart';
 import 'package:mockingbird_messaging/src/protocol/miaoba/server_options.dart';
+import 'package:mockingbird_messaging/src/protocol/protocol.dart';
 import 'package:mockingbird_messaging/src/storage/sqlite.dart';
 import 'package:mockingbird_messaging/src/transport/websocket.dart';
 import 'package:mockingbird_messaging/src/user_manager.dart';
@@ -26,7 +29,6 @@ Future<Mockingbird> installService(String token) async {
     cryptoMethod: AcceptCrypto.methodAesRsaSha256,
     token: token,
   );
-  miaoba.listen();
   Mockingbird.instance.addEventListener((Event e) {
     print("${e.type}: ${e.payload}");
   });
@@ -122,6 +124,33 @@ void main() async {
         channelIds: ["000005302j4jaygw"],
         folder: "Hello World",
       )));
+      await Future.delayed(const Duration(hours: 1));
+    });
+    test("connection not stable", () async {
+      SharedPreferences.setMockInitialValues({});
+      WidgetsFlutterBinding.ensureInitialized();
+      Mockingbird mockingbird =
+          await installService("MDAwMDA1ZXAycHVpaXRqNA==");
+      var i = 0;
+      mockingbird.protocol.addListener(() {
+        switch (mockingbird.protocol.state) {
+          case ConnectState.unconnect:
+            print("unconnect");
+            break;
+          case ConnectState.connecting:
+            print("connecting");
+            break;
+          case ConnectState.connected:
+            print("connected");
+            break;
+        }
+      });
+      Timer.periodic(const Duration(seconds: 3), (timer) async {
+        if (!await mockingbird.protocol.send(Event(type: "test-$i"))) {
+          print("could send event: $i");
+        }
+        i++;
+      });
       await Future.delayed(const Duration(hours: 1));
     });
   });

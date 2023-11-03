@@ -21,7 +21,9 @@ class WebsocketTransport extends Transport {
 
   WebSocketChannel? _channel;
   String endpoint;
+  VoidCallback? onDone;
   bool _normalStop = false;
+
   WebsocketConnectState _state = WebsocketConnectState.unconnected;
 
   factory WebsocketTransport(String ep) {
@@ -53,18 +55,25 @@ class WebsocketTransport extends Transport {
           print(error);
         }
       },
-      onDone: () {
+      onDone: () async {
         _state = WebsocketConnectState.unconnected;
         if (_normalStop) {
           return;
+        }
+        if (onDone != null) {
+          onDone!();
         }
       },
     );
   }
 
   @override
-  Future sendPacket(Packet packet) async {
-    return channel.sink.add(packet);
+  Future<bool> sendPacket(Packet packet) async {
+    if (_state == WebsocketConnectState.connected) {
+      channel.sink.add(packet);
+      return true;
+    }
+    return false;
   }
 
   @override
