@@ -8,6 +8,32 @@ import 'event.dart';
 part 'message.g.dart';
 
 @JsonSerializable(fieldRename: FieldRename.snake)
+class TypeMessage extends Payload {
+  static const String eventType = "channel.typing";
+  String channelId;
+  String userId;
+  String contentType;
+  String content;
+
+  TypeMessage({
+    required this.channelId,
+    required this.contentType,
+    required this.content,
+    required this.userId,
+  });
+  @override
+  String get type {
+    return eventType;
+  }
+
+  factory TypeMessage.fromJson(Map<String, dynamic> json) =>
+      _$TypeMessageFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$TypeMessageToJson(this);
+}
+
+@JsonSerializable(fieldRename: FieldRename.snake)
 class CreateMessage extends Payload {
   static const String eventType = "channel.message.create";
   @override
@@ -70,4 +96,17 @@ class DeleteMessage extends Payload {
 
   @override
   Map<String, dynamic> toJson() => _$DeleteMessageToJson(this);
+}
+
+@JsonSerializable(fieldRename: FieldRename.snake)
+class ViewMessage extends Payload {
+  static const String eventType = "channel.message.view";
+  String messageId;
+  String userId;
+  ViewMessage({required this.messageId, required this.userId});
+  @override
+  Map<String, dynamic> toJson() => _$ViewMessageToJson(this);
+
+  @override
+  String get type => eventType;
 }

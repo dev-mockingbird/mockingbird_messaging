@@ -112,7 +112,7 @@ class SyncDB {
     for (var col in ['online']) {
       data = _fixBooleanColumn(data, col);
     }
-    for (var col in ['deleted_at']) {
+    for (var col in ['deleted_at', 'contact_protected']) {
       data = _dropColumn(data, col);
     }
     return data;

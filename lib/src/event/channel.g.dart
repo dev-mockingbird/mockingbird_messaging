@@ -6,18 +6,6 @@ part of 'channel.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Typing _$TypingFromJson(Map<String, dynamic> json) => Typing(
-      channelId: json['channel_id'] as String,
-      contentType: json['content_type'] as String,
-      content: json['content'] as String,
-    );
-
-Map<String, dynamic> _$TypingToJson(Typing instance) => <String, dynamic>{
-      'channel_id': instance.channelId,
-      'content_type': instance.contentType,
-      'content': instance.content,
-    };
-
 CreateChannel _$CreateChannelFromJson(Map<String, dynamic> json) =>
     CreateChannel(
       subUserIds: (json['sub_user_ids'] as List<dynamic>?)
