@@ -1,5 +1,6 @@
 library mockingbird_messaging;
 
+import 'package:flutter/foundation.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:mockingbird_messaging/src/event/event.dart';
 import 'package:mockingbird_messaging/src/storage/sync.dart';
@@ -72,7 +73,7 @@ class ChangeLang extends Payload {
 
 class Mockingbird extends EventHandler {
   static final Mockingbird instance = Mockingbird._();
-  late Protocol protocol;
+  Protocol? _protocol;
   String _lang = "en";
   final List<HandleEvent> _handlers = [];
   late String userId;
@@ -91,9 +92,9 @@ class Mockingbird extends EventHandler {
     return _lang;
   }
 
-  set lang(String lang) {
+  Future<bool> setLanguage(String lang) async {
     _lang = lang;
-    protocol.send(buildEvent(ChangeLang(lang: lang)));
+    return send(buildEvent(ChangeLang(lang: lang)));
   }
 
   initialize({
@@ -102,34 +103,66 @@ class Mockingbird extends EventHandler {
     required clientId,
     required Database db,
   }) async {
-    protocol = proto;
+    _protocol = proto;
     this.db = db;
     this.userId = userId;
     proto.handler = this;
     proto.onConnected = () async {
-      await protocol.send(buildEvent(ConfigInfo(
+      await _protocol!.send(buildEvent(ConfigInfo(
         clientId: clientId,
         lang: _lang,
         time: DateTime.now(),
       )));
+      Map<String, String> ts = {};
+      for (var t in models) {
+        ts[t] = "";
+      }
+      var modelSyncs = await db.query(ModelSync.stableName,
+          where: "user_id = ?", whereArgs: [userId]);
+      for (var m in modelSyncs) {
+        ts[m['model'] as String] = m['last_updated_at'] as String;
+      }
+      for (var t in ts.keys) {
+        _protocol!.send(buildEvent(SyncModelRequest(
+          model: t,
+          userId: userId,
+          lastUpdatedAt: ts[t]!,
+        )));
+      }
     };
-    await protocol.listen();
-    Map<String, String> ts = {};
-    for (var t in models) {
-      ts[t] = "";
+    await _protocol!.listen();
+  }
+
+  bool addConnectStateListener(VoidCallback callback) {
+    if (valid()) {
+      _protocol!.addListener(callback);
+      return true;
     }
-    var modelSyncs = await db
-        .query(ModelSync.stableName, where: "user_id = ?", whereArgs: [userId]);
-    for (var m in modelSyncs) {
-      ts[m['model'] as String] = m['last_updated_at'] as String;
+    return false;
+  }
+
+  stop() {
+    if (valid()) {
+      _protocol!.stop();
     }
-    for (var t in ts.keys) {
-      protocol.send(buildEvent(SyncModelRequest(
-        model: t,
-        userId: userId,
-        lastUpdatedAt: ts[t]!,
-      )));
+  }
+
+  ConnectState get connectState {
+    if (_protocol == null) {
+      return ConnectState.unconnect;
     }
+    return _protocol!.state;
+  }
+
+  valid() {
+    return _protocol != null && _protocol!.state == ConnectState.connected;
+  }
+
+  Future<bool> send(Event event) async {
+    if (valid()) {
+      return await _protocol!.send(event);
+    }
+    return false;
   }
 
   @override

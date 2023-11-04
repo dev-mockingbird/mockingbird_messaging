@@ -21,6 +21,7 @@ abstract class Protocol extends ChangeNotifier {
   Protocol({required this.encoding});
   send(Event event);
   Future listen();
+  Future stop();
   set onConnected(Future Function() onConnected);
   ConnectState get state;
 

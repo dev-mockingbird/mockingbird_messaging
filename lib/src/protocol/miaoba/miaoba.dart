@@ -73,14 +73,14 @@ class Miaoba extends Protocol {
     }
     _listening = true;
     notifyListeners();
-    transport.onDone = () {
+    transport.onDone = (trans) {
       _state = _State.init;
       _connected = false;
       _listening = false;
       notifyListeners();
-      transport.layers.clear();
+      trans.layers.clear();
       Future.delayed(const Duration(seconds: 1))
-          .then((value) => transport.listen());
+          .then((value) => trans.listen());
     };
     transport.addEventHandler(handle);
     transport.listen();
@@ -99,13 +99,13 @@ class Miaoba extends Protocol {
       case _State.acceptAuth:
         _acceptAuth(e);
         _connected = true;
+        notifyListeners();
         if (onConnected != null) {
           await onConnected!();
         }
         if (!_handshake.isCompleted) {
           _handshake.complete();
         }
-        notifyListeners();
       case _State.connected:
         if (handler != null) {
           return handler!.handle(e);
@@ -246,5 +246,15 @@ class Miaoba extends Protocol {
       cryptoMethod: cm,
     )));
     _state = _State.acceptCrypto;
+  }
+
+  @override
+  Future stop() async {
+    await transport.close();
+    _state = _State.init;
+    _connected = false;
+    _listening = false;
+    notifyListeners();
+    transport.layers.clear();
   }
 }

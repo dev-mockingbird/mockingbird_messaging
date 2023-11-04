@@ -19,7 +19,7 @@ typedef TransportEventHandler = Future Function(Packet packet, Transport t);
 abstract class Transport extends ChangeNotifier {
   List<TransportEventHandler> handlers = [];
   List<Layer> layers = [];
-  set onDone(VoidCallback? onDone);
+  set onDone(Function(Transport)? onDone);
   addEventHandler(TransportEventHandler handler) {
     handlers.add(handler);
   }

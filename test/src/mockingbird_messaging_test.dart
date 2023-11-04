@@ -87,7 +87,7 @@ void main() async {
       WidgetsFlutterBinding.ensureInitialized();
       Mockingbird mockingbird =
           await installService("MDAwMDA0eWVnMG1jYnFwcw==");
-      mockingbird.protocol.send(buildEvent(CreateChannel()));
+      mockingbird.send(buildEvent(CreateChannel()));
       await Future.delayed(const Duration(hours: 1));
     });
     test("send message", () async {
@@ -95,7 +95,7 @@ void main() async {
       WidgetsFlutterBinding.ensureInitialized();
       Mockingbird mockingbird =
           await installService("MDAwMDA0eWVnMG1jYnFwcw==");
-      mockingbird.protocol.send(buildEvent(CreateMessage(
+      mockingbird.send(buildEvent(CreateMessage(
         channelId: "000005302j4jaygw",
         content: "你好",
         contentType: "text",
@@ -107,7 +107,7 @@ void main() async {
       WidgetsFlutterBinding.ensureInitialized();
       Mockingbird mockingbird =
           await installService("MDAwMDA0eWVnMG1jYnFwcw==");
-      mockingbird.protocol.send(buildEvent(TypeMessage(
+      mockingbird.send(buildEvent(TypeMessage(
         channelId: "000005302j4jaygw",
         content: "你好",
         contentType: "text",
@@ -120,7 +120,7 @@ void main() async {
       WidgetsFlutterBinding.ensureInitialized();
       Mockingbird mockingbird =
           await installService("MDAwMDA0eWVnMG1jYnFwcw==");
-      mockingbird.protocol.send(buildEvent(UpdateChannelFolder(
+      mockingbird.send(buildEvent(UpdateChannelFolder(
         channelIds: ["000005302j4jaygw"],
         folder: "Hello World",
       )));
@@ -132,8 +132,8 @@ void main() async {
       Mockingbird mockingbird =
           await installService("MDAwMDA1ZXAycHVpaXRqNA==");
       var i = 0;
-      mockingbird.protocol.addListener(() {
-        switch (mockingbird.protocol.state) {
+      mockingbird.addConnectStateListener(() {
+        switch (mockingbird.connectState) {
           case ConnectState.unconnect:
             print("unconnect");
             break;
@@ -146,11 +146,45 @@ void main() async {
         }
       });
       Timer.periodic(const Duration(seconds: 3), (timer) async {
-        if (!await mockingbird.protocol.send(Event(type: "test-$i"))) {
+        if (!await mockingbird.send(Event(type: "test-$i"))) {
           print("could send event: $i");
         }
         i++;
       });
+      await Future.delayed(const Duration(hours: 1));
+    });
+    test("reconnect", () async {
+      SharedPreferences.setMockInitialValues({});
+      WidgetsFlutterBinding.ensureInitialized();
+      Mockingbird mockingbird =
+          await installService("MDAwMDA1ZXAycHVpaXRqNA==");
+      mockingbird.addConnectStateListener(() {
+        switch (mockingbird.connectState) {
+          case ConnectState.unconnect:
+            print("unconnect");
+            break;
+          case ConnectState.connecting:
+            print("connecting");
+            break;
+          case ConnectState.connected:
+            print("connected");
+            break;
+        }
+      });
+      await mockingbird.stop();
+      var miaoba = Miaoba(
+        transport: WebsocketTransport("ws://127.0.0.1:9000/ws"),
+        encoding: JsonEncoding(),
+        cryptoMethod: AcceptCrypto.methodAesRsaSha256,
+        token: "MDAwMDA1ZXAycHVpaXRqNA==",
+      );
+      await mockingbird.initialize(
+        userId: "000004ydgqcv7aio",
+        proto: miaoba,
+        db: await Sqlite().getdb(),
+        clientId: "xxxxxx",
+      );
+      await mockingbird.stop();
       await Future.delayed(const Duration(hours: 1));
     });
   });

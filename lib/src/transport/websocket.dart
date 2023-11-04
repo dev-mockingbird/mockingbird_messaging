@@ -17,24 +17,17 @@ enum WebsocketConnectState {
 }
 
 class WebsocketTransport extends Transport {
-  static final Map<String, WebsocketTransport> _internal = {};
-
   WebSocketChannel? _channel;
   String endpoint;
-  VoidCallback? onDone;
+  Function(Transport)? onDone;
   bool _normalStop = false;
 
-  WebsocketConnectState _state = WebsocketConnectState.unconnected;
+  WebsocketConnectState _state;
 
-  factory WebsocketTransport(String ep) {
-    if (_internal.containsKey(ep)) {
-      return _internal[ep]!;
-    }
-    _internal[ep] = WebsocketTransport._(endpoint: ep);
-    return _internal[ep]!;
-  }
-
-  WebsocketTransport._({required this.endpoint});
+  WebsocketTransport(
+    this.endpoint, {
+    this.onDone,
+  }) : _state = WebsocketConnectState.unconnected;
 
   WebsocketConnectState get state {
     return _state;
@@ -46,7 +39,7 @@ class WebsocketTransport extends Transport {
       return;
     }
     _normalStop = false;
-    channel.stream.listen(
+    _connectedChannel.stream.listen(
       (m) {
         handle(Uint8List.fromList(m.codeUnits), this);
       },
@@ -60,8 +53,10 @@ class WebsocketTransport extends Transport {
         if (_normalStop) {
           return;
         }
+        print(
+            "websocket closed: ${_channel?.closeCode}: ${_channel?.closeReason}");
         if (onDone != null) {
-          onDone!();
+          onDone!(this);
         }
       },
     );
@@ -70,7 +65,7 @@ class WebsocketTransport extends Transport {
   @override
   Future<bool> sendPacket(Packet packet) async {
     if (_state == WebsocketConnectState.connected) {
-      channel.sink.add(packet);
+      _connectedChannel.sink.add(packet);
       return true;
     }
     return false;
@@ -87,7 +82,7 @@ class WebsocketTransport extends Transport {
     return;
   }
 
-  WebSocketChannel get channel {
+  WebSocketChannel get _connectedChannel {
     if (_state == WebsocketConnectState.connected) {
       return _channel!;
     }
