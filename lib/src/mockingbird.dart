@@ -134,16 +134,24 @@ class Mockingbird extends EventHandler {
   }
 
   bool addConnectStateListener(VoidCallback callback) {
-    if (valid()) {
+    if (_protocol != null) {
       _protocol!.addListener(callback);
       return true;
     }
     return false;
   }
 
-  stop() {
+  bool removeConnectStateListener(VoidCallback callback) {
+    if (_protocol != null) {
+      _protocol!.removeListener(callback);
+      return true;
+    }
+    return false;
+  }
+
+  stop() async {
     if (valid()) {
-      _protocol!.stop();
+      await _protocol!.stop();
     }
   }
 

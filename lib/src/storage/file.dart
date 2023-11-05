@@ -71,16 +71,12 @@ class FileCacher {
       _cachedFileInfos[id] = info;
       return info;
     }
-    try {
-      FileInfo info = await fileManager.getFileInfo(id);
-      _cachedFileInfos[id] = info;
-      await KV.save(id, jsonEncode(info));
-      return info;
-    } catch (e) {
-      if (kDebugMode) {
-        print(e);
-      }
+    info = await fileManager.getFileInfo(id);
+    if (info == null) {
       return null;
     }
+    _cachedFileInfos[id] = info;
+    await KV.save(id, jsonEncode(info));
+    return info;
   }
 }

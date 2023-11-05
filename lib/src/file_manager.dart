@@ -7,20 +7,23 @@ import 'fileinfo.dart';
 import 'http_helper.dart';
 
 abstract class FileManager {
-  Future<String> createFileId();
-  Future<FileInfo> upload(
+  Future<String?> createFileId();
+  Future<FileInfo?> upload(
     String id,
     file, {
     Function(int sent, int total)? onSent,
   });
-  Future<FileInfo> getFileInfo(String id);
+  Future<FileInfo?> getFileInfo(String id);
 
-  Future<dynamic> download(String path, String savePath,
-      {void Function(int, int)? receiveCallback,
-      Map<String, dynamic>? data,
-      HandleError? showError});
+  Future<dynamic> download(
+    String path,
+    String savePath, {
+    void Function(int, int)? receiveCallback,
+    Map<String, dynamic>? data,
+    HandleError? showError,
+  });
 
-  Future<String> getAccessUrl(String id);
+  Future<String?> getAccessUrl(String id);
 }
 
 class HttpFileManager extends FileManager {
@@ -33,30 +36,47 @@ class HttpFileManager extends FileManager {
   }
 
   @override
-  Future<String> getAccessUrl(String id) async {
+  Future<String?> getAccessUrl(String id) async {
     final res = await helper.get('/files/$id');
-    return res['data']['access_url'];
+    if (res != null) {
+      return res['data']['access_url'];
+    }
+    return null;
   }
 
   @override
-  Future<FileInfo> upload(String id, file,
+  Future<FileInfo?> upload(String id, file,
       {Function(int sent, int total)? onSent}) async {
-    var res = await helper.upload('/files/$id', file, onSent: onSent);
-    return res['data'];
+    var res = await helper.upload(
+      '/files/$id',
+      file,
+      method: 'put',
+      onSent: onSent,
+    );
+    if (res != null) {
+      return FileInfo.fromJson(res['data']);
+    }
+    return null;
   }
 
   @override
-  Future download(String path, String savePath,
-      {void Function(int, int)? receiveCallback,
-      Map<String, dynamic>? data,
-      HandleError? showError}) async {
+  Future download(
+    String path,
+    String savePath, {
+    void Function(int, int)? receiveCallback,
+    Map<String, dynamic>? data,
+    HandleError? showError,
+  }) async {
     return await helper.download(path, savePath,
         receiveCallback: receiveCallback, data: data, showError: showError);
   }
 
   @override
-  Future<FileInfo> getFileInfo(String id) async {
+  Future<FileInfo?> getFileInfo(String id) async {
     final res = await helper.get('/files/$id');
+    if (res == null) {
+      return null;
+    }
     var raw = res['data']['info'];
     if (raw != null) {
       var info = FileInfo.fromJson(raw);
@@ -64,6 +84,9 @@ class HttpFileManager extends FileManager {
       return info;
     }
     return FileInfo(
-        id: id, mimeType: "unknown", accessUrl: res['data']['access_url']);
+      id: id,
+      mimeType: "unknown",
+      accessUrl: res['data']['access_url'],
+    );
   }
 }

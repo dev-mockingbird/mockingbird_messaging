@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockingbird_messaging/src/file_manager.dart';
 import 'package:mockingbird_messaging/src/mockingbird.dart';
 import 'package:mockingbird_messaging/src/encoding/encoding.dart';
 import 'package:mockingbird_messaging/src/event/channel.dart';
@@ -81,6 +82,11 @@ void main() async {
       UserManager um = HttpUserManager(helper: getDioHelper());
       var accountType = await um.verifyAccount("yangzhong");
       print(accountType);
+    });
+    test("test file id", () async {
+      FileManager um = HttpFileManager(helper: getDioHelper());
+      var fileId = await um.createFileId();
+      print(fileId);
     });
     test("miaoba", () async {
       SharedPreferences.setMockInitialValues({});

@@ -3,6 +3,8 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
@@ -116,10 +118,13 @@ class DioHelper {
   }
 
   // upload
-  Future<dynamic> upload(String path, data,
-      {Function(int sent, int total)? onSent,
-      String method = "post",
-      HandleError? showError}) async {
+  Future<dynamic> upload(
+    String path,
+    data, {
+    Function(int sent, int total)? onSent,
+    String method = "post",
+    HandleError? showError,
+  }) async {
     return await _do(() async {
       var uploader = await dioUpload();
       if (method == "post") {
@@ -158,6 +163,9 @@ class DioHelper {
       Future<Response> Function() d, HandleError? handleError) async {
     try {
       Response res = await d();
+      if (res.data is String) {
+        return jsonDecode(res.data);
+      }
       return res.data;
     } catch (e) {
       _errorHandler(e, handleError);

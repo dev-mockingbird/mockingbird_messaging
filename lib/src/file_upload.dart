@@ -18,7 +18,13 @@ class FileUploader {
     List<FileInfo?> infos = [];
     locate(XFile file) async {
       var id = await fileManager.createFileId();
-      infos.add(await _upload(id, file, onSent));
+      if (id == null) {
+        return;
+      }
+      var info = await _upload(id, file, onSent);
+      if (info != null) {
+        infos.add(info);
+      }
     }
 
     for (var file in files) {
@@ -30,18 +36,18 @@ class FileUploader {
 
   Future<FileInfo?> _upload(String id, XFile file, onSent) async {
     var data = await file.readAsBytes();
-    FormData formData = FormData.fromMap(
-        {"file": MultipartFile.fromBytes(data, filename: _getFileName(file))});
-    try {
-      return await fileManager.upload(id, formData,
-          onSent: (int sent, int total) {
-        if (onSent != null) {
-          onSent(file, sent, total);
-        }
-      });
-    } catch (e) {
-      return null;
-    }
+    FormData formData = FormData.fromMap({
+      "file": MultipartFile.fromBytes(
+        data,
+        filename: _getFileName(file),
+      ),
+    });
+    return await fileManager.upload(id, formData,
+        onSent: (int sent, int total) {
+      if (onSent != null) {
+        onSent(file, sent, total);
+      }
+    });
   }
 
   _getFileName(XFile file) {

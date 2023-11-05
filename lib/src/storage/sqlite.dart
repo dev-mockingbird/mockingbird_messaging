@@ -4,13 +4,14 @@
 // https://opensource.org/licenses/MIT
 
 import 'dart:async';
+import 'dart:io';
 import 'package:mockingbird_messaging/src/storage/model/channel.dart';
 import 'package:mockingbird_messaging/src/storage/model/message.dart';
 import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'model/contact.dart';
 import 'model/model_sync.dart';
@@ -75,15 +76,30 @@ class Sqlite {
     if (kIsWeb) {
       databaseFactory = databaseFactoryFfiWeb;
     } else {
+      if (Platform.isWindows || Platform.isLinux) {
+        sqfliteFfiInit();
+      }
       databaseFactory = databaseFactoryFfi;
     }
     if (_db != null) {
       return _db!;
     }
-    var path = await getDatabasesPath();
-    print("database db path: $path");
-    _db = await openDatabase(join(path, 'mockingbird_database.db'),
-        version: 8, onCreate: _initDatabase, onUpgrade: _upgrade);
+    String path;
+    if (!kIsWeb && (Platform.isIOS || Platform.isAndroid)) {
+      var dir = await getApplicationCacheDirectory();
+      path = dir.path;
+    } else {
+      path = await getDatabasesPath();
+    }
+    if (kDebugMode) {
+      print("database db path: $path");
+    }
+    _db = await openDatabase(
+      join(path, 'mockingbird_database.db'),
+      version: 8,
+      onCreate: _initDatabase,
+      onUpgrade: _upgrade,
+    );
     return _db!;
   }
 
@@ -101,7 +117,9 @@ class Sqlite {
       "CREATE TABLE ${ModelSync.stableName}(${ModelSync.fields.join(",")})",
     ];
     for (var sql in sqls) {
-      print(sql);
+      if (kDebugMode) {
+        print(sql);
+      }
       await db.execute(sql);
     }
   }
