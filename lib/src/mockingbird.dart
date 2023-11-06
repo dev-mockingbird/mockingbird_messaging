@@ -1,5 +1,7 @@
 library mockingbird_messaging;
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:mockingbird_messaging/src/event/event.dart';
@@ -10,6 +12,20 @@ import 'storage/model/model_sync.dart';
 part 'mockingbird.g.dart';
 
 typedef HandleEvent = Function(Event);
+
+class RequestIdEventHandler extends EventHandler {
+  Function(Event e) handleFunc;
+  String requestId;
+  RequestIdEventHandler(
+    this.handleFunc, {
+    required this.requestId,
+  });
+
+  @override
+  handle(Event e) {
+    return handleFunc(e);
+  }
+}
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class SyncModelRequest extends Payload {
@@ -106,7 +122,7 @@ class Mockingbird extends EventHandler {
     _protocol = proto;
     this.db = db;
     this.userId = userId;
-    proto.handler = this;
+    proto.addEventListner(this);
     proto.onConnected = () async {
       await _protocol!.send(buildEvent(ConfigInfo(
         clientId: clientId,
@@ -166,11 +182,29 @@ class Mockingbird extends EventHandler {
     return _protocol != null && _protocol!.state == ConnectState.connected;
   }
 
-  Future<bool> send(Event event) async {
-    if (valid()) {
+  Future<bool> send(Event event, {Function(Event e)? waitFor}) async {
+    if (!valid()) {
+      return false;
+    }
+    if (waitFor == null) {
       return await _protocol!.send(event);
     }
-    return false;
+    var completer = Completer();
+    var requestId = DateTime.now().toUtc().millisecondsSinceEpoch.toString();
+    event.withMeta("request-id", requestId);
+    var handler = RequestIdEventHandler((e) {
+      if (e.hasMeta("request-id", requestId)) {
+        waitFor(e);
+        completer.complete();
+      }
+    }, requestId: requestId);
+    _protocol!.addEventListner(handler);
+    if (!await _protocol!.send(event)) {
+      return false;
+    }
+    await completer.future;
+    _protocol!.removeEventListner(handler);
+    return true;
   }
 
   @override

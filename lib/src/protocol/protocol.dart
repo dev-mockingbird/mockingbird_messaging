@@ -17,11 +17,30 @@ enum ConnectState {
 
 abstract class Protocol extends ChangeNotifier {
   Encoding encoding;
-  EventHandler? handler;
+  List<EventHandler> _handlers = [];
   Protocol({required this.encoding});
   send(Event event);
   Future listen();
   Future stop();
+  addEventListner(EventHandler handler) {
+    if (!_handlers.contains(handler)) {
+      _handlers.add(handler);
+    }
+  }
+
+  removeEventListner(EventHandler handler) {
+    if (_handlers.contains(handler)) {
+      _handlers.remove(handler);
+    }
+  }
+
+  @protected
+  callHandler(Event e) {
+    for (var handler in _handlers) {
+      handler.handle(e);
+    }
+  }
+
   set onConnected(Future Function() onConnected);
   ConnectState get state;
 

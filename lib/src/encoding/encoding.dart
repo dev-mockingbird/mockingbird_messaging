@@ -24,7 +24,8 @@ class JsonEncoding extends Encoding {
   @override
   Event decode(Packet payload) {
     var utf8Encoded = utf8.decode(payload);
-    var event = Event.fromJson(jsonDecode(utf8Encoded));
+    var decoded = jsonDecode(utf8Encoded);
+    var event = Event.fromJson(decoded);
     event.unpackPayload();
     return event;
   }

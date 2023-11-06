@@ -93,7 +93,12 @@ void main() async {
       WidgetsFlutterBinding.ensureInitialized();
       Mockingbird mockingbird =
           await installService("MDAwMDA0eWVnMG1jYnFwcw==");
-      mockingbird.send(buildEvent(CreateChannel()));
+      await mockingbird.send(
+        buildEvent(CreateChannel()),
+        waitFor: (Event e) {
+          print(e);
+        },
+      );
       await Future.delayed(const Duration(hours: 1));
     });
     test("send message", () async {

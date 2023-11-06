@@ -107,9 +107,7 @@ class Miaoba extends Protocol {
           _handshake.complete();
         }
       case _State.connected:
-        if (handler != null) {
-          return handler!.handle(e);
-        }
+        callHandler(e);
     }
   }
 

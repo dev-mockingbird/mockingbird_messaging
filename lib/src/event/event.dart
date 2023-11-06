@@ -28,6 +28,28 @@ class Event {
     }
   }
 
+  withMeta(String key, String val) {
+    metadata ??= {};
+    metadata![key] = val;
+  }
+
+  bool hasMeta(String key, String val) {
+    metadata ??= {};
+    return metadata![key] == val;
+  }
+
+  String getMeta(String key) {
+    metadata ??= {};
+    return metadata![key] ?? "";
+  }
+
+  eachMeta(Function(String key, String val) h) {
+    metadata ??= {};
+    for (var entry in metadata!.entries) {
+      h(entry.key, entry.value);
+    }
+  }
+
   packPayload() {
     metadata = metadata ?? {};
     metadata!['encoding'] = "json";

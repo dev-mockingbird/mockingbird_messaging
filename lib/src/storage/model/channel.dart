@@ -31,7 +31,9 @@ class Channel extends SqliteModel {
   DateTime? updatedAt;
 
   static const List<String> fields = [
-    "id TEXT",
+    "id TEXT PRIMARY KEY",
+    "parent_id TEXT",
+    "parent_type TEXT",
     "name TEXT",
     "nickname TEXT",
     "avatar_url TEXT",
