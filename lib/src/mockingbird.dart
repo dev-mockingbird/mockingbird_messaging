@@ -110,7 +110,7 @@ class Mockingbird extends EventHandler {
 
   Future<bool> setLanguage(String lang) async {
     _lang = lang;
-    return send(buildEvent(ChangeLang(lang: lang)));
+    return await send(buildEvent(ChangeLang(lang: lang)));
   }
 
   initialize({
@@ -182,19 +182,33 @@ class Mockingbird extends EventHandler {
     return _protocol != null && _protocol!.state == ConnectState.connected;
   }
 
-  Future<bool> send(Event event, {Function(Event e)? waitFor}) async {
+  Future<dynamic> send(
+    Event event, {
+    bool? waitResult,
+    Duration? timeout,
+  }) async {
     if (!valid()) {
       return false;
     }
-    if (waitFor == null) {
+    if (!(waitResult ?? false)) {
       return await _protocol!.send(event);
     }
     var completer = Completer();
     var requestId = DateTime.now().toUtc().millisecondsSinceEpoch.toString();
     event.withMeta("request-id", requestId);
+    Event? result;
+    Timer? timer;
+    if (timeout != null) {
+      timer = Timer(timeout, () {
+        completer.complete();
+      });
+    }
     var handler = RequestIdEventHandler((e) {
       if (e.hasMeta("request-id", requestId)) {
-        waitFor(e);
+        result = e;
+        if (timer != null) {
+          timer.cancel();
+        }
         completer.complete();
       }
     }, requestId: requestId);
@@ -204,7 +218,7 @@ class Mockingbird extends EventHandler {
     }
     await completer.future;
     _protocol!.removeEventListner(handler);
-    return true;
+    return result;
   }
 
   @override

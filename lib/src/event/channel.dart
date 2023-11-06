@@ -18,6 +18,7 @@ class CreateChannel extends Payload {
   String? name;
   String? description;
   String? folder;
+  bool one2one;
   String? nickname;
   String? thumbnail;
   int? sendMessageMaxRole;
@@ -25,6 +26,7 @@ class CreateChannel extends Payload {
   List<String>? subUserIds;
 
   CreateChannel({
+    required this.one2one,
     this.subUserIds,
     this.name,
     this.description,
@@ -52,9 +54,7 @@ class UpdateChannel extends Payload {
 
   String id;
   String? name;
-  bool one2one;
   String? description;
-  String? folder;
   String? nickname;
   String? avatarUrl;
   int? writeMaxRole;
@@ -62,10 +62,8 @@ class UpdateChannel extends Payload {
 
   UpdateChannel({
     required this.id,
-    required this.one2one,
     this.name,
     this.description,
-    this.folder,
     this.nickname,
     this.avatarUrl,
     this.writeMaxRole,

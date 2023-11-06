@@ -8,6 +8,7 @@ part of 'channel.dart';
 
 CreateChannel _$CreateChannelFromJson(Map<String, dynamic> json) =>
     CreateChannel(
+      one2one: json['one2one'] as bool,
       subUserIds: (json['sub_user_ids'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
@@ -25,6 +26,7 @@ Map<String, dynamic> _$CreateChannelToJson(CreateChannel instance) =>
       'name': instance.name,
       'description': instance.description,
       'folder': instance.folder,
+      'one2one': instance.one2one,
       'nickname': instance.nickname,
       'thumbnail': instance.thumbnail,
       'send_message_max_role': instance.sendMessageMaxRole,
@@ -35,10 +37,8 @@ Map<String, dynamic> _$CreateChannelToJson(CreateChannel instance) =>
 UpdateChannel _$UpdateChannelFromJson(Map<String, dynamic> json) =>
     UpdateChannel(
       id: json['id'] as String,
-      one2one: json['one2one'] as bool,
       name: json['name'] as String?,
       description: json['description'] as String?,
-      folder: json['folder'] as String?,
       nickname: json['nickname'] as String?,
       avatarUrl: json['avatar_url'] as String?,
       writeMaxRole: json['write_max_role'] as int?,
@@ -49,9 +49,7 @@ Map<String, dynamic> _$UpdateChannelToJson(UpdateChannel instance) =>
     <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
-      'one2one': instance.one2one,
       'description': instance.description,
-      'folder': instance.folder,
       'nickname': instance.nickname,
       'avatar_url': instance.avatarUrl,
       'write_max_role': instance.writeMaxRole,
