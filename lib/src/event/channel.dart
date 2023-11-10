@@ -15,24 +15,24 @@ class CreateChannel extends Payload {
     return eventType;
   }
 
+  bool one2one;
   String? name;
   String? description;
   String? folder;
-  bool one2one;
   String? nickname;
-  String? thumbnail;
+  String? avatarUrl;
   int? sendMessageMaxRole;
   int? readMessageMaxRole;
-  List<String>? subUserIds;
+  List<String>? subscribeUserIds;
 
   CreateChannel({
     required this.one2one,
-    this.subUserIds,
+    this.subscribeUserIds,
     this.name,
     this.description,
     this.folder,
     this.nickname,
-    this.thumbnail,
+    this.avatarUrl,
     this.readMessageMaxRole,
     this.sendMessageMaxRole,
   });

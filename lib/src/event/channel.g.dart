@@ -9,29 +9,29 @@ part of 'channel.dart';
 CreateChannel _$CreateChannelFromJson(Map<String, dynamic> json) =>
     CreateChannel(
       one2one: json['one2one'] as bool,
-      subUserIds: (json['sub_user_ids'] as List<dynamic>?)
+      subscribeUserIds: (json['subscribe_user_ids'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
       name: json['name'] as String?,
       description: json['description'] as String?,
       folder: json['folder'] as String?,
       nickname: json['nickname'] as String?,
-      thumbnail: json['thumbnail'] as String?,
+      avatarUrl: json['avatar_url'] as String?,
       readMessageMaxRole: json['read_message_max_role'] as int?,
       sendMessageMaxRole: json['send_message_max_role'] as int?,
     );
 
 Map<String, dynamic> _$CreateChannelToJson(CreateChannel instance) =>
     <String, dynamic>{
+      'one2one': instance.one2one,
       'name': instance.name,
       'description': instance.description,
       'folder': instance.folder,
-      'one2one': instance.one2one,
       'nickname': instance.nickname,
-      'thumbnail': instance.thumbnail,
+      'avatar_url': instance.avatarUrl,
       'send_message_max_role': instance.sendMessageMaxRole,
       'read_message_max_role': instance.readMessageMaxRole,
-      'sub_user_ids': instance.subUserIds,
+      'subscribe_user_ids': instance.subscribeUserIds,
     };
 
 UpdateChannel _$UpdateChannelFromJson(Map<String, dynamic> json) =>
