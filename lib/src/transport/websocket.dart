@@ -10,32 +10,26 @@ import 'package:mockingbird_messaging/src/transport/transport.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
 
-enum WebsocketConnectState {
-  unconnected,
-  connecting,
-  connected,
-}
-
 class WebsocketTransport extends Transport {
   WebSocketChannel? _channel;
   String endpoint;
   Function(Transport)? onDone;
   bool _normalStop = false;
 
-  WebsocketConnectState _state;
+  TransportConnectState _state;
 
   WebsocketTransport(
     this.endpoint, {
     this.onDone,
-  }) : _state = WebsocketConnectState.unconnected;
+  }) : _state = TransportConnectState.unconnected;
 
-  WebsocketConnectState get state {
+  TransportConnectState get state {
     return _state;
   }
 
   @override
   Future listen() async {
-    if (_state != WebsocketConnectState.unconnected) {
+    if (_state != TransportConnectState.unconnected) {
       return;
     }
     _normalStop = false;
@@ -49,7 +43,7 @@ class WebsocketTransport extends Transport {
         }
       },
       onDone: () async {
-        _state = WebsocketConnectState.unconnected;
+        _state = TransportConnectState.unconnected;
         if (_normalStop) {
           return;
         }
@@ -64,7 +58,7 @@ class WebsocketTransport extends Transport {
 
   @override
   Future<bool> sendPacket(Packet packet) async {
-    if (_state == WebsocketConnectState.connected) {
+    if (_state == TransportConnectState.connected) {
       _connectedChannel.sink.add(packet);
       return true;
     }
@@ -73,8 +67,8 @@ class WebsocketTransport extends Transport {
 
   @override
   Future close() async {
-    if (_state == WebsocketConnectState.connected) {
-      _state = WebsocketConnectState.unconnected;
+    if (_state == TransportConnectState.connected) {
+      _state = TransportConnectState.unconnected;
       _normalStop = true;
       await _channel!.sink.close(status.goingAway);
       _channel = null;
@@ -83,10 +77,10 @@ class WebsocketTransport extends Transport {
   }
 
   WebSocketChannel get _connectedChannel {
-    if (_state == WebsocketConnectState.connected) {
+    if (_state == TransportConnectState.connected) {
       return _channel!;
     }
-    _state = WebsocketConnectState.connected;
+    _state = TransportConnectState.connected;
     final wsUrl = Uri.parse(endpoint);
     _channel = WebSocketChannel.connect(wsUrl);
     return _channel!;

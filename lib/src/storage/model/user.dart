@@ -32,9 +32,9 @@ class NamedAvatar {
   }
 
   String get displayName {
-    if (nickname != null) {
+    if (nickname != null && nickname != "") {
       return nickname!;
-    } else if (name != null) {
+    } else if (name != null && nickname != "") {
       return name!;
     } else {
       return id;

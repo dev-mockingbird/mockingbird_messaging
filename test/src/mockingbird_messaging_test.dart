@@ -19,13 +19,24 @@ import 'package:mockingbird_messaging/src/protocol/miaoba/miaoba.dart';
 import 'package:mockingbird_messaging/src/protocol/miaoba/server_options.dart';
 import 'package:mockingbird_messaging/src/protocol/protocol.dart';
 import 'package:mockingbird_messaging/src/storage/sqlite.dart';
+import 'package:mockingbird_messaging/src/transport/tcp.dart';
+import 'package:mockingbird_messaging/src/transport/transport.dart';
 import 'package:mockingbird_messaging/src/transport/websocket.dart';
 import 'package:mockingbird_messaging/src/user_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<Mockingbird> installService(String token) async {
+  var transport = TcpTransport(ip: "127.0.0.1", port: 7001);
+  // var transport = WebsocketTransport("ws://127.0.0.1:9000/ws");
+  return await installServiceWithTransport(token, transport);
+}
+
+Future<Mockingbird> installServiceWithTransport(
+  String token,
+  Transport transport,
+) async {
   var miaoba = Miaoba(
-    transport: WebsocketTransport("ws://127.0.0.1:9000/ws"),
+    transport: transport,
     encoding: JsonEncoding(),
     cryptoMethod: AcceptCrypto.methodAesRsaSha256,
     token: token,
@@ -92,11 +103,15 @@ void main() async {
       SharedPreferences.setMockInitialValues({});
       WidgetsFlutterBinding.ensureInitialized();
       Mockingbird mockingbird =
-          await installService("MDAwMDA0eWVnMG1jYnFwcw==");
+          await installService("MDAwMDA1cjBubWhjYnVvMA==");
       Event? r = await mockingbird.send(
-        buildEvent(CreateChannel(one2one: false)),
+        buildEvent(CreateChannel(
+          one2one: false,
+          parentId: "000005qz8up72ebk",
+          parentType: "message",
+        )),
         waitResult: true,
-        timeout: const Duration(seconds: 1),
+        timeout: const Duration(seconds: 20),
       );
       if (r != null) {
         print("${r.type} ${r.payload}");
@@ -121,7 +136,7 @@ void main() async {
       SharedPreferences.setMockInitialValues({});
       WidgetsFlutterBinding.ensureInitialized();
       Mockingbird mockingbird =
-          await installService("MDAwMDA0eWVnMG1jYnFwcw==");
+          await installService("MDAwMDA1cjBqdHhpNWwzNA==");
       mockingbird.send(buildEvent(TypeMessage(
         channelId: "000005302j4jaygw",
         content: "你好",

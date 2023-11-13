@@ -18,6 +18,8 @@ class CreateChannel extends Payload {
   bool one2one;
   String? name;
   String? description;
+  String? parentId;
+  String? parentType;
   String? folder;
   String? nickname;
   String? avatarUrl;
@@ -30,6 +32,8 @@ class CreateChannel extends Payload {
     this.subscribeUserIds,
     this.name,
     this.description,
+    this.parentId,
+    this.parentType,
     this.folder,
     this.nickname,
     this.avatarUrl,

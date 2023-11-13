@@ -14,6 +14,12 @@ abstract class Layer {
   Future<Packet> decode(Packet p);
 }
 
+enum TransportConnectState {
+  unconnected,
+  connecting,
+  connected,
+}
+
 typedef TransportEventHandler = Future Function(Packet packet, Transport t);
 
 abstract class Transport extends ChangeNotifier {
