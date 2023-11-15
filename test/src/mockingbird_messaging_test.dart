@@ -19,15 +19,14 @@ import 'package:mockingbird_messaging/src/protocol/miaoba/miaoba.dart';
 import 'package:mockingbird_messaging/src/protocol/miaoba/server_options.dart';
 import 'package:mockingbird_messaging/src/protocol/protocol.dart';
 import 'package:mockingbird_messaging/src/storage/sqlite.dart';
-import 'package:mockingbird_messaging/src/transport/tcp.dart';
 import 'package:mockingbird_messaging/src/transport/transport.dart';
 import 'package:mockingbird_messaging/src/transport/websocket.dart';
 import 'package:mockingbird_messaging/src/user_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<Mockingbird> installService(String token) async {
-  var transport = TcpTransport(ip: "127.0.0.1", port: 7001);
-  // var transport = WebsocketTransport("ws://127.0.0.1:9000/ws");
+  // var transport = TcpTransport(ip: "127.0.0.1", port: 7001);
+  var transport = WebsocketTransport("ws://127.0.0.1:9000/ws");
   return await installServiceWithTransport(token, transport);
 }
 
@@ -44,12 +43,17 @@ Future<Mockingbird> installServiceWithTransport(
   Mockingbird.instance.addEventListener((Event e) {
     print("${e.type}: ${e.payload}");
   });
-  await Mockingbird.instance.initialize(
+  var r = await Mockingbird.instance.initialize(
     userId: "000004ydgqcv7aio",
     proto: miaoba,
     db: await Sqlite().getdb(),
     clientId: "xxxxxx",
   );
+  if (!r) {
+    print(
+        "${Mockingbird.instance.lastCode}: ${Mockingbird.instance.lastError}");
+    throw Mockingbird.instance.lastError;
+  }
   return Mockingbird.instance;
 }
 
@@ -136,7 +140,7 @@ void main() async {
       SharedPreferences.setMockInitialValues({});
       WidgetsFlutterBinding.ensureInitialized();
       Mockingbird mockingbird =
-          await installService("MDAwMDA1cjBqdHhpNWwzNA==");
+          await installService("MDAwMDA1cjBqdHhpNWwzNB==");
       mockingbird.send(buildEvent(TypeMessage(
         channelId: "000005302j4jaygw",
         content: "你好",

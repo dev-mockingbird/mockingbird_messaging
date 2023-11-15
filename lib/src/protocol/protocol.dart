@@ -15,17 +15,43 @@ enum ConnectState {
   connected,
 }
 
+enum ErrorCode {
+  ok,
+  unsupportedAuthMethod,
+  unsupportedCompressMethod,
+  unexpectedEvent,
+  unableToDeliveryMessage,
+  invalidPublicKey,
+  authFailed,
+}
+
 abstract class Protocol extends ChangeNotifier {
   Encoding encoding;
-  List<EventHandler> _handlers = [];
+  final List<EventHandler> _handlers = [];
+  ErrorCode _lastCode = ErrorCode.ok;
+  String _lastError = "";
   Protocol({required this.encoding});
   send(Event event);
-  Future listen();
+  Future<bool> listen();
   Future stop();
   addEventListner(EventHandler handler) {
     if (!_handlers.contains(handler)) {
       _handlers.add(handler);
     }
+  }
+
+  ErrorCode get lastCode {
+    return _lastCode;
+  }
+
+  String get lastError {
+    return _lastError;
+  }
+
+  @protected
+  setLastError(ErrorCode code, String error) {
+    _lastCode = code;
+    _lastError = error;
   }
 
   removeEventListner(EventHandler handler) {

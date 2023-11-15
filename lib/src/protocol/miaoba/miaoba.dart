@@ -31,7 +31,7 @@ class Miaoba extends Protocol {
   _State _state = _State.init;
   SaslMessageType? _scramState = SaslMessageType.AuthenticationSASL;
   Authenticator? _scramAuth;
-  final Completer _handshake;
+  final Completer<bool> _handshake;
   late ServerOptions opt;
   late AsymmetricKeyPair<PublicKey, PrivateKey> clientKeyPair;
   bool _listening = false;
@@ -54,7 +54,7 @@ class Miaoba extends Protocol {
     this.token,
     this.username,
     this.password,
-  }) : _handshake = Completer();
+  }) : _handshake = Completer<bool>();
 
   @override
   ConnectState get state {
@@ -67,7 +67,7 @@ class Miaoba extends Protocol {
   }
 
   @override
-  Future listen() {
+  Future<bool> listen() {
     if (_listening) {
       return _handshake.future;
     }
@@ -91,23 +91,40 @@ class Miaoba extends Protocol {
     Event e = decode(payload);
     switch (_state) {
       case _State.init:
-        return _init(e);
+        if (!await _init(e)) {
+          _handshake.complete(false);
+          await transport.close();
+        }
+        break;
       case _State.acceptCrypto:
-        return _acceptCrypto(e);
+        if (!await _acceptCrypto(e)) {
+          _handshake.complete(false);
+          await transport.close();
+        }
+        break;
       case _State.acceptCompress:
-        return _acceptCompress(e);
+        if (!await _acceptCompress(e)) {
+          _handshake.complete(false);
+          await transport.close();
+        }
+        break;
       case _State.acceptAuth:
-        _acceptAuth(e);
+        if (!await _acceptAuth(e)) {
+          _handshake.complete(false);
+          await transport.close();
+          return;
+        }
         _connected = true;
         notifyListeners();
         if (onConnected != null) {
           await onConnected!();
         }
         if (!_handshake.isCompleted) {
-          _handshake.complete();
+          _handshake.complete(true);
         }
+        break;
       case _State.connected:
-        callHandler(e);
+        await callHandler(e);
     }
   }
 
@@ -120,14 +137,16 @@ class Miaoba extends Protocol {
     return false;
   }
 
-  _acceptCrypto(Event e) async {
+  Future<bool> _acceptCrypto(Event e) async {
     if (e.type != CryptoAccepted.eventType) {
-      throw Exception("[crypto-accepted] event expected");
+      setLastError(
+          ErrorCode.unexpectedEvent, "[crypto-accepted] event expected");
+      return false;
     }
     var opt = CryptoAccepted.fromJson(e.payload ?? {});
     var cm = cryptoMethod ?? AcceptCrypto.methodPlaintext;
     if (cm == AcceptCrypto.methodPlaintext) {
-      return _startAcceptCompress();
+      return await _startAcceptCompress();
     }
     var hashName = cm.replaceAll("AES-", "").replaceAll("RSA-", "");
     if (cm.contains("AES-")) {
@@ -139,99 +158,147 @@ class Miaoba extends Protocol {
       );
       var aesKey = await encrypter.decode(encAesKey);
       transport.pushLayer(AESEncrypter(key: aesKey));
-      return _startAcceptCompress();
+      return await _startAcceptCompress();
     }
     var publicKey = RSAHelper.parsePublicKeyFromPem(opt.publicKey!);
     if (publicKey == null) {
-      throw Exception("public key from server is invalid");
+      setLastError(
+          ErrorCode.invalidPublicKey, "public key from server is invalid");
+      return false;
     }
     transport.pushLayer(RSAEncrypter(
       publicKey: publicKey,
       privateKey: clientKeyPair.privateKey as RSAPrivateKey,
       digestFactory: RSAEncrypter.getDigestFactory(hashName),
     ));
-    return _startAcceptCompress();
+    return await _startAcceptCompress();
   }
 
-  _startAcceptCompress() {
+  Future<bool> _startAcceptCompress() async {
     var cm = compressMethod ?? AcceptCompress.gzip;
     if (!opt.acceptCompress.contains(cm)) {
-      throw Exception("compress $cm not supported");
+      setLastError(
+        ErrorCode.unsupportedCompressMethod,
+        "compress $cm not supported",
+      );
+      return false;
     }
-    transport.send(encodePayload(AcceptCompress(compressMethod: cm)));
+    var p = encodePayload(AcceptCompress(compressMethod: cm));
+    if (!await _send(p)) {
+      return false;
+    }
     _state = _State.acceptCompress;
+    return true;
   }
 
-  _acceptCompress(Event e) {
+  Future<bool> _acceptCompress(Event e) async {
     if (e.type != "compress-accepted") {
-      throw Exception("[compress-accepted] event expected");
+      setLastError(
+        ErrorCode.unexpectedEvent,
+        "[compress-accepted] event expected",
+      );
+      return false;
     }
     var cm = compressMethod ?? AcceptCompress.gzip;
     switch (cm) {
       case AcceptCompress.gzip:
         transport.pushLayer(GZip());
       default:
-        throw Exception("client not support compress $cm");
+        setLastError(
+          ErrorCode.unsupportedCompressMethod,
+          "client not support compress $cm",
+        );
+        return false;
     }
-    _startAcceptAuth();
+    return await _startAcceptAuth();
   }
 
-  _startAcceptAuth() {
+  Future<bool> _send(Packet e) async {
+    if (!await transport.send(e)) {
+      setLastError(
+          ErrorCode.unableToDeliveryMessage, "can't send message to server");
+      return false;
+    }
+    return true;
+  }
+
+  Future<bool> _startAcceptAuth() async {
     if (token != null) {
-      transport.send(encodePayload(
-          AcceptAuth(authMethod: AcceptAuth.methodToken, token: token)));
+      var p = encodePayload(AcceptAuth(
+        authMethod: AcceptAuth.methodToken,
+        token: token,
+      ));
+      if (!await _send(p)) {
+        return false;
+      }
       _state = _State.acceptAuth;
-      return;
+      return true;
     }
     var sm = scramMethod ?? AcceptAuth.scramSha256;
-    _scramAuth = ScramAuthenticator(sm, AcceptAuth.hash(sm),
-        UsernamePasswordCredential(username: username, password: password));
+    _scramAuth = ScramAuthenticator(
+      sm,
+      AcceptAuth.hash(sm),
+      UsernamePasswordCredential(username: username, password: password),
+    );
     var bs = _scramAuth!.handleMessage(_scramState!, Uint8List.fromList([]));
     if (bs == null) {
-      throw Exception("can't get initial bytes");
+      setLastError(ErrorCode.authFailed, "can't get initial bytes");
+      return false;
     }
-    transport.send(encodePayload(AcceptAuth(
+    var p = encodePayload(AcceptAuth(
         authMethod: AcceptAuth.methodScram,
         mechanism: sm,
-        info: base64Encode(bs))));
+        info: base64Encode(bs)));
+    if (!await _send(p)) {
+      return false;
+    }
     _scramState = SaslMessageType.AuthenticationSASLContinue;
     _state = _State.acceptAuth;
+    return true;
   }
 
-  _acceptAuth(Event e) {
+  Future<bool> _acceptAuth(Event e) async {
     if (_scramState == null || token != null) {
       if (e.type != "auth-accepted") {
-        throw Exception("auth failed");
+        setLastError(ErrorCode.authFailed, "auth failed");
+        return false;
       }
       _state = _State.connected;
-      return;
+      return true;
     }
     var info = ScramInfo.fromJson(e.payload!);
     var codes = base64Decode(info.info);
     var bs = _scramAuth!.handleMessage(_scramState!, codes);
     if (bs != null) {
-      transport.send(encodePayload(ScramInfo(info: base64Encode(bs))));
+      var p = encodePayload(ScramInfo(info: base64Encode(bs)));
+      if (!await _send(p)) {
+        return false;
+      }
     }
     if (_scramState == SaslMessageType.AuthenticationSASLContinue) {
       _scramState = SaslMessageType.AuthenticationSASLFinal;
     } else if (_scramState == SaslMessageType.AuthenticationSASLFinal) {
       _scramState = null;
     }
+    return true;
   }
 
-  _init(Event e) async {
+  Future<bool> _init(Event e) async {
     if (e.type != ServerOptions.eventType) {
-      throw Exception("not a server option message");
+      setLastError(ErrorCode.unexpectedEvent, "not a server option message");
+      return false;
     }
     opt = ServerOptions.fromJson(e.payload!);
-    return _startAcceptCrypto();
+    return await _startAcceptCrypto();
   }
 
-  _startAcceptCrypto() {
+  Future<bool> _startAcceptCrypto() async {
     var cm = cryptoMethod ?? AcceptCrypto.methodPlaintext;
     String? rsaKey;
     if (!opt.acceptCrypto.contains(cm)) {
-      throw Exception("unacceptable crypto method $cm");
+      setLastError(
+          ErrorCode.unsupportedAuthMethod, "unacceptable crypto method $cm");
+      return false;
     }
     if (cm.contains("RSA")) {
       clientKeyPair = RSAHelper.generateKeyPair();
@@ -239,11 +306,15 @@ class Miaoba extends Protocol {
         clientKeyPair.publicKey as RSAPublicKey,
       );
     }
-    transport.send(encodePayload(AcceptCrypto(
+    var p = encodePayload(AcceptCrypto(
       clientRSAPublicKey: rsaKey,
       cryptoMethod: cm,
-    )));
+    ));
+    if (!await _send(p)) {
+      return false;
+    }
     _state = _State.acceptCrypto;
+    return true;
   }
 
   @override

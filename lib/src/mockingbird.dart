@@ -108,12 +108,20 @@ class Mockingbird extends EventHandler {
     return _lang;
   }
 
+  ErrorCode get lastCode {
+    return _protocol!.lastCode;
+  }
+
+  String get lastError {
+    return _protocol!.lastError;
+  }
+
   Future<bool> setLanguage(String lang) async {
     _lang = lang;
     return await send(buildEvent(ChangeLang(lang: lang)));
   }
 
-  initialize({
+  Future<bool> initialize({
     required userId,
     required Protocol proto,
     required clientId,
@@ -146,7 +154,7 @@ class Mockingbird extends EventHandler {
         )));
       }
     };
-    await _protocol!.listen();
+    return await _protocol!.listen();
   }
 
   bool addConnectStateListener(VoidCallback callback) {
