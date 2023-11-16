@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mockingbird_messaging/mockingbird_messaging.dart';
 
-Future<Mockingbird> installService(String token) async {
+Future<bool> installService(String token) async {
   var miaoba = Miaoba(
     transport: WebsocketTransport("ws://127.0.0.1:9000/ws"),
     encoding: JsonEncoding(),
@@ -16,13 +16,12 @@ Future<Mockingbird> installService(String token) async {
   Mockingbird.instance.addEventListener((Event e) {
     print("${e.type}: ${e.payload}");
   });
-  await Mockingbird.instance.initialize(
+  return await Mockingbird.instance.initialize(
     userId: "000004ydgqcv7aio",
     proto: miaoba,
     db: await Sqlite().getdb(),
     clientId: "xxxxxx",
   );
-  return Mockingbird.instance;
 }
 
 void main() async {
@@ -40,21 +39,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a blue toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),

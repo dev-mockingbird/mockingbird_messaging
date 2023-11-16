@@ -18,7 +18,7 @@ class DioHelper {
   Dio? _dio;
   Dio? _dioUpload;
 
-  Future<Dio> getDio() async {
+  Dio get dio {
     _dio ??= Dio(
       BaseOptions(
         baseUrl: domain,
@@ -26,23 +26,17 @@ class DioHelper {
         receiveTimeout: const Duration(seconds: 30),
       ),
     );
-    try {
-      if (token != null) {
-        _dio!.options.headers['authorization'] = 'Bearer $token';
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print(e);
-      }
+    if (token != null) {
+      _dio!.options.headers['authorization'] = 'Bearer $token';
     }
     return _dio!;
   }
 
-  Future<Dio> dioUpload({
+  Dio dioUpload({
     Duration? receiveTimeout,
     Duration? connectTimeout,
     Duration? sendTimeout,
-  }) async {
+  }) {
     _dioUpload ??= Dio(
       BaseOptions(
         baseUrl: domain,
@@ -54,14 +48,8 @@ class DioHelper {
         sendTimeout: sendTimeout,
       ),
     );
-    try {
-      if (token != null) {
-        _dioUpload!.options.headers['authorization'] = 'Bearer $token';
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print(e);
-      }
+    if (token != null) {
+      _dioUpload!.options.headers['authorization'] = 'Bearer $token';
     }
     return _dioUpload!;
   }
@@ -74,7 +62,6 @@ class DioHelper {
     HandleError? onError,
   }) async {
     return await _do(() async {
-      var dio = await getDio();
       return await dio.get(path, queryParameters: data, options: options);
     }, onError);
   }
@@ -87,7 +74,6 @@ class DioHelper {
     HandleError? showError,
   }) async {
     return await _do(() async {
-      var dio = await getDio();
       return await dio.post(path, data: data, options: options);
     }, showError);
   }
@@ -100,7 +86,6 @@ class DioHelper {
     HandleError? showError,
   }) async {
     return await _do(() async {
-      var dio = await getDio();
       return await dio.put(path, data: data, options: options);
     }, showError);
   }
@@ -113,7 +98,6 @@ class DioHelper {
     HandleError? showError,
   }) async {
     return await _do(() async {
-      var dio = await getDio();
       return await dio.delete(path, data: data, options: options);
     }, showError);
   }
@@ -127,7 +111,7 @@ class DioHelper {
     HandleError? handleError,
   }) async {
     return await _do(() async {
-      var uploader = await dioUpload();
+      var uploader = dioUpload();
       if (method == "post") {
         return await uploader.post(path, data: data, onSendProgress: onSent);
       }
@@ -145,7 +129,7 @@ class DioHelper {
     HandleError? showError,
   }) async {
     return await _do(() async {
-      var dio = await getDio();
+      var dio = dioUpload();
       return await dio.download(
         path,
         savePath,
@@ -161,7 +145,9 @@ class DioHelper {
   }
 
   Future<dynamic> _do(
-      Future<Response> Function() d, HandleError? handleError) async {
+    Future<Response> Function() d,
+    HandleError? handleError,
+  ) async {
     try {
       Response res = await d();
       if (res.data is String) {
