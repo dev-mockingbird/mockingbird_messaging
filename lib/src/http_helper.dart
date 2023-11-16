@@ -45,13 +45,14 @@ class DioHelper {
   }) async {
     _dioUpload ??= Dio(
       BaseOptions(
-          baseUrl: domain,
-          // If you want to receive the response data with String, use `plain`.
-          responseType: ResponseType.plain,
-          contentType: Headers.formUrlEncodedContentType,
-          connectTimeout: connectTimeout,
-          receiveTimeout: receiveTimeout,
-          sendTimeout: sendTimeout),
+        baseUrl: domain,
+        // If you want to receive the response data with String, use `plain`.
+        responseType: ResponseType.plain,
+        contentType: Headers.formUrlEncodedContentType,
+        connectTimeout: connectTimeout,
+        receiveTimeout: receiveTimeout,
+        sendTimeout: sendTimeout,
+      ),
     );
     try {
       if (token != null) {
@@ -123,7 +124,7 @@ class DioHelper {
     data, {
     Function(int sent, int total)? onSent,
     String method = "post",
-    HandleError? showError,
+    HandleError? handleError,
   }) async {
     return await _do(() async {
       var uploader = await dioUpload();
@@ -131,7 +132,7 @@ class DioHelper {
         return await uploader.post(path, data: data, onSendProgress: onSent);
       }
       return await uploader.put(path, data: data, onSendProgress: onSent);
-    }, showError);
+    }, handleError);
   }
 
   // download

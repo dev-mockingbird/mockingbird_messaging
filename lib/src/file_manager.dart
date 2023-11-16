@@ -12,6 +12,7 @@ abstract class FileManager {
     String id,
     file, {
     Function(int sent, int total)? onSent,
+    Function(dynamic)? onFail,
   });
   Future<FileInfo?> getFileInfo(String id);
 
@@ -20,7 +21,7 @@ abstract class FileManager {
     String savePath, {
     void Function(int, int)? receiveCallback,
     Map<String, dynamic>? data,
-    HandleError? showError,
+    HandleError? handleError,
   });
 
   Future<String?> getAccessUrl(String id);
@@ -45,13 +46,18 @@ class HttpFileManager extends FileManager {
   }
 
   @override
-  Future<FileInfo?> upload(String id, file,
-      {Function(int sent, int total)? onSent}) async {
+  Future<FileInfo?> upload(
+    String id,
+    file, {
+    Function(int sent, int total)? onSent,
+    Function(dynamic)? onFail,
+  }) async {
     var res = await helper.upload(
       '/files/$id',
       file,
       method: 'put',
       onSent: onSent,
+      handleError: onFail,
     );
     if (res != null) {
       return FileInfo.fromJson(res['data']);
@@ -65,10 +71,15 @@ class HttpFileManager extends FileManager {
     String savePath, {
     void Function(int, int)? receiveCallback,
     Map<String, dynamic>? data,
-    HandleError? showError,
+    HandleError? handleError,
   }) async {
-    return await helper.download(path, savePath,
-        receiveCallback: receiveCallback, data: data, showError: showError);
+    return await helper.download(
+      path,
+      savePath,
+      receiveCallback: receiveCallback,
+      data: data,
+      showError: handleError,
+    );
   }
 
   @override

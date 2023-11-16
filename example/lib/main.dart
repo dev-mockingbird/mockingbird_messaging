@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mockingbird_messaging/mockingbird_messaging.dart';
 
 Future<Mockingbird> installService(String token) async {
@@ -80,6 +83,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  String fileInfos = "";
+  TextEditingController controller = TextEditingController();
 
   void _incrementCounter() {
     setState(() {
@@ -136,6 +141,26 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
+            ElevatedButton(
+              onPressed: () async {
+                final ImagePicker picker = ImagePicker();
+                final List<XFile> media = await picker.pickMultipleMedia();
+                _uploadMedia(media);
+              },
+              child: const Text("上传图片"),
+            ),
+            Text(fileInfos),
+            TextField(controller: controller),
+            ElevatedButton(
+                onPressed: () {
+                  var cacher = FileCacher(
+                    fileManager: HttpFileManager(
+                      helper: DioHelper(domain: "http://127.0.0.1:9000"),
+                    ),
+                  );
+                  cacher.cacheFile(controller.text, (p1, p2) {});
+                },
+                child: const Text("下载图片")),
           ],
         ),
       ),
@@ -145,5 +170,26 @@ class _MyHomePageState extends State<MyHomePage> {
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  _uploadMedia(List<XFile> files) async {
+    var uploader = FileUploader(
+      fileManager: HttpFileManager(
+        helper: DioHelper(
+          domain: "http://127.0.0.1:9000",
+        ),
+      ),
+    );
+    var infos = await uploader.upload(files, onFail: (file, code, info) {
+      print("${file.name}, $code, $info");
+    });
+    for (var i = 0; i < infos.length; i++) {
+      if (infos[i] == null) {
+        infos.removeAt(i);
+      }
+    }
+    setState(() {
+      controller.text = jsonEncode(infos);
+    });
   }
 }
