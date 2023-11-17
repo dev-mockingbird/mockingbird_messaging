@@ -22,6 +22,7 @@ class Message extends SqliteModel {
     'id TEXT PRIMARY KEY',
     'channel_id TEXT',
     'prev_id TEXT',
+    'refer_message_id TEXT',
     'type TEXT',
     'content TEXT',
     'creator_id TEXT',
