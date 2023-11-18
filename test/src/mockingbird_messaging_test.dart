@@ -17,7 +17,6 @@ import 'package:mockingbird_messaging/src/event/message.dart';
 import 'package:mockingbird_messaging/src/http_helper.dart';
 import 'package:mockingbird_messaging/src/protocol/miaoba/miaoba.dart';
 import 'package:mockingbird_messaging/src/protocol/miaoba/server_options.dart';
-import 'package:mockingbird_messaging/src/protocol/protocol.dart';
 import 'package:mockingbird_messaging/src/storage/sqlite.dart';
 import 'package:mockingbird_messaging/src/transport/transport.dart';
 import 'package:mockingbird_messaging/src/transport/websocket.dart';
@@ -163,22 +162,31 @@ void main() async {
     test("connection not stable", () async {
       SharedPreferences.setMockInitialValues({});
       WidgetsFlutterBinding.ensureInitialized();
-      Mockingbird mockingbird =
-          await installService("MDAwMDA1ZXAycHVpaXRqNA==");
-      var i = 0;
-      mockingbird.addConnectStateListener(() {
-        switch (mockingbird.connectState) {
-          case ConnectState.unconnect:
+      var completer = Completer();
+      Mockingbird.instance.addListener(() {
+        switch (Mockingbird.instance.state) {
+          case MockingbirdState.unconnect:
             print("unconnect");
             break;
-          case ConnectState.connecting:
+          case MockingbirdState.connecting:
             print("connecting");
             break;
-          case ConnectState.connected:
+          case MockingbirdState.connected:
             print("connected");
+            break;
+          case MockingbirdState.modelSyncing:
+            print("model syncing");
+            break;
+          case MockingbirdState.modelSynced:
+            print("model synced");
+            completer.complete();
             break;
         }
       });
+      Mockingbird mockingbird =
+          await installService("MDAwMDA1ZXAycHVpaXRqNA==");
+      var i = 0;
+      await completer.future;
       Timer.periodic(const Duration(seconds: 3), (timer) async {
         if (!await mockingbird.send(Event(type: "test-$i"))) {
           print("could send event: $i");
@@ -190,21 +198,30 @@ void main() async {
     test("reconnect", () async {
       SharedPreferences.setMockInitialValues({});
       WidgetsFlutterBinding.ensureInitialized();
-      Mockingbird mockingbird =
-          await installService("MDAwMDA1ZXAycHVpaXRqNA==");
-      mockingbird.addConnectStateListener(() {
-        switch (mockingbird.connectState) {
-          case ConnectState.unconnect:
+      var completer = Completer();
+      Mockingbird.instance.addListener(() {
+        switch (Mockingbird.instance.state) {
+          case MockingbirdState.unconnect:
             print("unconnect");
             break;
-          case ConnectState.connecting:
+          case MockingbirdState.connecting:
             print("connecting");
             break;
-          case ConnectState.connected:
+          case MockingbirdState.connected:
             print("connected");
+            break;
+          case MockingbirdState.modelSyncing:
+            print("model syncing");
+            break;
+          case MockingbirdState.modelSynced:
+            print("model synced");
+            completer.complete();
             break;
         }
       });
+      Mockingbird mockingbird =
+          await installService("MDAwMDA1ZXAycHVpaXRqNA==");
+      await completer.future;
       await mockingbird.stop();
       var miaoba = Miaoba(
         transport: WebsocketTransport("ws://127.0.0.1:9000/ws"),

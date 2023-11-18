@@ -26,6 +26,7 @@ abstract class Transport extends ChangeNotifier {
   List<TransportEventHandler> handlers = [];
   List<Layer> layers = [];
   set onDone(Function(Transport)? onDone);
+  TransportConnectState _state = TransportConnectState.unconnected;
   addEventHandler(TransportEventHandler handler) {
     handlers.add(handler);
   }
@@ -35,6 +36,16 @@ abstract class Transport extends ChangeNotifier {
   }
 
   Future listen();
+
+  @protected
+  setState(TransportConnectState state) {
+    _state = state;
+    notifyListeners();
+  }
+
+  TransportConnectState get state {
+    return _state;
+  }
 
   Future send(Packet packet) async {
     List<Layer> ls = layers;

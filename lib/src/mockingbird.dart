@@ -3,17 +3,16 @@ library mockingbird_messaging;
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:json_annotation/json_annotation.dart';
 import 'package:mockingbird_messaging/src/event/event.dart';
 import 'package:mockingbird_messaging/src/storage/sync.dart';
 import 'package:sqflite/sqflite.dart';
+import 'init_events.dart';
 import 'protocol/protocol.dart';
 import 'storage/model/model_sync.dart';
-part 'mockingbird.g.dart';
 
 typedef HandleEvent = Function(Event);
 
-class RequestIdEventHandler extends EventHandler {
+class RequestIdEventHandler implements EventHandler {
   Function(Event e) handleFunc;
   String requestId;
   RequestIdEventHandler(
@@ -27,73 +26,23 @@ class RequestIdEventHandler extends EventHandler {
   }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class SyncModelRequest extends Payload {
-  static const String eventType = 'model.sync.request';
-  String model;
-  String lastUpdatedAt;
-  String userId;
-
-  SyncModelRequest({
-    required this.model,
-    required this.userId,
-    required this.lastUpdatedAt,
-  });
-
-  @override
-  Map<String, dynamic> toJson() => _$SyncModelRequestToJson(this);
-
-  @override
-  String get type => eventType;
+enum MockingbirdState {
+  unconnect,
+  connecting,
+  connected,
+  modelSyncing,
+  modelSynced,
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class ConfigInfo extends Payload {
-  static const String eventType = 'config-info';
-  String lang;
-  String clientId;
-  DateTime time;
-  ConfigInfo({
-    required this.lang,
-    required this.clientId,
-    required this.time,
-  });
-
-  factory ConfigInfo.fromJson(Map<String, dynamic> json) =>
-      _$ConfigInfoFromJson(json);
-
-  @override
-  Map<String, dynamic> toJson() => _$ConfigInfoToJson(this);
-
-  @override
-  String get type => eventType;
-}
-
-@JsonSerializable(fieldRename: FieldRename.snake)
-class ChangeLang extends Payload {
-  static const String eventType = 'change-lang';
-  String lang;
-  ChangeLang({
-    required this.lang,
-  });
-
-  factory ChangeLang.fromJson(Map<String, dynamic> json) =>
-      _$ChangeLangFromJson(json);
-
-  @override
-  Map<String, dynamic> toJson() => _$ChangeLangToJson(this);
-
-  @override
-  String get type => eventType;
-}
-
-class Mockingbird extends EventHandler {
+class Mockingbird extends ChangeNotifier implements EventHandler {
   static final Mockingbird instance = Mockingbird._();
   Protocol? _protocol;
   String _lang = "en";
   final List<HandleEvent> _handlers = [];
   late String userId;
   late Database db;
+  MockingbirdState _state = MockingbirdState.unconnect;
+  final Map<String, bool> _modelSyncState = {};
   static List<String> models = [
     "channels",
     "subscribers",
@@ -110,6 +59,10 @@ class Mockingbird extends EventHandler {
 
   ErrorCode get lastCode {
     return _protocol!.lastCode;
+  }
+
+  MockingbirdState get state {
+    return _state;
   }
 
   String get lastError {
@@ -130,7 +83,24 @@ class Mockingbird extends EventHandler {
     _protocol = proto;
     this.db = db;
     this.userId = userId;
+    _state = MockingbirdState.unconnect;
+    notifyListeners();
+    _modelSyncState.clear();
     proto.addEventListner(this);
+    proto.addListener(() {
+      switch (proto.state) {
+        case ConnectState.unconnect:
+          _state = MockingbirdState.unconnect;
+          break;
+        case ConnectState.connecting:
+          _state = MockingbirdState.connecting;
+          break;
+        case ConnectState.connected:
+          _state = MockingbirdState.connected;
+          break;
+      }
+      notifyListeners();
+    });
     proto.onConnected = () async {
       await _protocol!.send(buildEvent(ConfigInfo(
         clientId: clientId,
@@ -153,37 +123,16 @@ class Mockingbird extends EventHandler {
           lastUpdatedAt: ts[t]!,
         )));
       }
+      _state = MockingbirdState.modelSyncing;
+      notifyListeners();
     };
     return await _protocol!.listen();
-  }
-
-  bool addConnectStateListener(VoidCallback callback) {
-    if (_protocol != null) {
-      _protocol!.addListener(callback);
-      return true;
-    }
-    return false;
-  }
-
-  bool removeConnectStateListener(VoidCallback callback) {
-    if (_protocol != null) {
-      _protocol!.removeListener(callback);
-      return true;
-    }
-    return false;
   }
 
   stop() async {
     if (valid()) {
       await _protocol!.stop();
     }
-  }
-
-  ConnectState get connectState {
-    if (_protocol == null) {
-      return ConnectState.unconnect;
-    }
-    return _protocol!.state;
   }
 
   valid() {
@@ -235,6 +184,20 @@ class Mockingbird extends EventHandler {
       var change = ModelChanged.fromJson(event.payload!);
       var syncer = SyncDB(db: db);
       await syncer.applyEvent(userId, change);
+    } else if (event.type == SyncModelDone.eventType) {
+      var payload = SyncModelDone.fromJson(event.payload!);
+      _modelSyncState[payload.model] = true;
+      bool done = true;
+      for (var model in models) {
+        if (!(_modelSyncState[model] ?? false)) {
+          done = false;
+          break;
+        }
+      }
+      if (done) {
+        _state = MockingbirdState.modelSynced;
+        notifyListeners();
+      }
     }
 
     for (var handle in _handlers) {

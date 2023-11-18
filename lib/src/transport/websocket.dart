@@ -16,20 +16,14 @@ class WebsocketTransport extends Transport {
   Function(Transport)? onDone;
   bool _normalStop = false;
 
-  TransportConnectState _state;
-
   WebsocketTransport(
     this.endpoint, {
     this.onDone,
-  }) : _state = TransportConnectState.unconnected;
-
-  TransportConnectState get state {
-    return _state;
-  }
+  });
 
   @override
   Future listen() async {
-    if (_state != TransportConnectState.unconnected) {
+    if (state != TransportConnectState.unconnected) {
       return;
     }
     _normalStop = false;
@@ -43,7 +37,7 @@ class WebsocketTransport extends Transport {
         }
       },
       onDone: () async {
-        _state = TransportConnectState.unconnected;
+        setState(TransportConnectState.unconnected);
         if (_normalStop) {
           return;
         }
@@ -58,7 +52,7 @@ class WebsocketTransport extends Transport {
 
   @override
   Future<bool> sendPacket(Packet packet) async {
-    if (_state == TransportConnectState.connected) {
+    if (state == TransportConnectState.connected) {
       _connectedChannel.sink.add(packet);
       return true;
     }
@@ -67,8 +61,8 @@ class WebsocketTransport extends Transport {
 
   @override
   Future close() async {
-    if (_state == TransportConnectState.connected) {
-      _state = TransportConnectState.unconnected;
+    if (state == TransportConnectState.connected) {
+      setState(TransportConnectState.unconnected);
       _normalStop = true;
       await _channel!.sink.close(status.goingAway);
       _channel = null;
@@ -77,10 +71,10 @@ class WebsocketTransport extends Transport {
   }
 
   WebSocketChannel get _connectedChannel {
-    if (_state == TransportConnectState.connected) {
+    if (state == TransportConnectState.connected) {
       return _channel!;
     }
-    _state = TransportConnectState.connected;
+    setState(TransportConnectState.connected);
     final wsUrl = Uri.parse(endpoint);
     _channel = WebSocketChannel.connect(wsUrl);
     return _channel!;

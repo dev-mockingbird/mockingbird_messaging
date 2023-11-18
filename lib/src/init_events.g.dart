@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'mockingbird.dart';
+part of 'init_events.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
@@ -18,6 +18,16 @@ Map<String, dynamic> _$SyncModelRequestToJson(SyncModelRequest instance) =>
       'model': instance.model,
       'last_updated_at': instance.lastUpdatedAt,
       'user_id': instance.userId,
+    };
+
+SyncModelDone _$SyncModelDoneFromJson(Map<String, dynamic> json) =>
+    SyncModelDone(
+      model: json['model'] as String,
+    );
+
+Map<String, dynamic> _$SyncModelDoneToJson(SyncModelDone instance) =>
+    <String, dynamic>{
+      'model': instance.model,
     };
 
 ConfigInfo _$ConfigInfoFromJson(Map<String, dynamic> json) => ConfigInfo(
