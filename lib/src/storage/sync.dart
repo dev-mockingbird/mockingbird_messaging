@@ -67,7 +67,7 @@ class SyncDB {
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  Map<String, dynamic> _fixNullableColumn(
+  static Map<String, dynamic> _fixNullableColumn(
     Map<String, dynamic> data,
     String name,
   ) {
@@ -82,7 +82,7 @@ class SyncDB {
     return data;
   }
 
-  Map<String, dynamic> _fixBooleanColumn(
+  static Map<String, dynamic> _fixBooleanColumn(
     Map<String, dynamic> data,
     String name,
   ) {
@@ -97,7 +97,7 @@ class SyncDB {
     return data;
   }
 
-  Map<String, dynamic> _dropColumn(
+  static Map<String, dynamic> _dropColumn(
     Map<String, dynamic> data,
     String name,
   ) {
@@ -105,7 +105,11 @@ class SyncDB {
     return data;
   }
 
-  Map<String, dynamic> _fixData(Map<String, dynamic> data) {
+  static alignModel(Map<String, dynamic> data) {
+    return _fixData(data);
+  }
+
+  static Map<String, dynamic> _fixData(Map<String, dynamic> data) {
     for (var col in ['last_read_message_at', 'last_message_at']) {
       data = _fixNullableColumn(data, col);
     }
