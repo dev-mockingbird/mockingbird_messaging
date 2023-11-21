@@ -14,6 +14,8 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'model/contact.dart';
+import 'model/message_like.dart';
+import 'model/message_tag.dart';
 import 'model/model_sync.dart';
 import 'model/subscriber.dart';
 import 'model/user.dart';
@@ -115,6 +117,8 @@ class Sqlite {
       "CREATE TABLE ${Contact.stableName}(${Contact.fields.join(",")})",
       "CREATE TABLE ${Subscriber.stableName}(${Subscriber.fields.join(",")})",
       "CREATE TABLE ${ModelSync.stableName}(${ModelSync.fields.join(",")})",
+      "CREATE TABLE ${MessageLike.stableName}(${MessageLike.fields.join(",")})",
+      "CREATE TABLE ${MessageTag.stableName}(${MessageTag.fields.join(",")})",
     ];
     for (var sql in sqls) {
       if (kDebugMode) {

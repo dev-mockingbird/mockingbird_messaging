@@ -110,3 +110,43 @@ class ViewMessage extends Payload {
   @override
   String get type => eventType;
 }
+
+@JsonSerializable(fieldRename: FieldRename.snake)
+class LikeMessage extends Payload {
+  static const String eventType = "channel.message.like";
+  String messageId;
+  int amount;
+  LikeMessage({
+    required this.messageId,
+    required this.amount,
+  });
+
+  LikeMessage.like({required this.messageId}) : amount = 1;
+  LikeMessage.unlike({required this.messageId}) : amount = -1;
+  LikeMessage.uncertain({required this.messageId}) : amount = 0;
+
+  @override
+  Map<String, dynamic> toJson() => _$LikeMessageToJson(this);
+
+  @override
+  String get type => eventType;
+}
+
+@JsonSerializable(fieldRename: FieldRename.snake)
+class TagMessage extends Payload {
+  static const String eventType = "channel.message.tag";
+  String messageId;
+  String tag;
+  bool untag;
+  TagMessage({
+    required this.messageId,
+    required this.tag,
+    this.untag = false,
+  });
+
+  @override
+  Map<String, dynamic> toJson() => _$TagMessageToJson(this);
+
+  @override
+  String get type => eventType;
+}

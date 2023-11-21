@@ -1,19 +1,17 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'message.dart';
+part of 'message_tag.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-Message _$MessageFromJson(Map<String, dynamic> json) => Message(
+MessageTag _$MessageTagFromJson(Map<String, dynamic> json) => MessageTag(
       id: json['id'] as String,
       channelId: json['channel_id'] as String,
-      type: json['type'] as String,
-      content: json['content'],
-      creatorId: json['creator_id'] as String,
-      referMessageId: json['refer_message_id'] as String?,
-      prevId: json['prev_id'] as String?,
+      messageId: json['message_id'] as String,
+      creatorUserId: json['creator_user_id'] as String,
+      tag: json['tag'] as String,
       createdAt: json['created_at'] == null
           ? null
           : DateTime.parse(json['created_at'] as String),
@@ -22,14 +20,13 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
           : DateTime.parse(json['updated_at'] as String),
     );
 
-Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
+Map<String, dynamic> _$MessageTagToJson(MessageTag instance) =>
+    <String, dynamic>{
       'id': instance.id,
       'channel_id': instance.channelId,
-      'type': instance.type,
-      'prev_id': instance.prevId,
-      'content': instance.content,
-      'creator_id': instance.creatorId,
-      'refer_message_id': instance.referMessageId,
+      'message_id': instance.messageId,
+      'creator_user_id': instance.creatorUserId,
+      'tag': instance.tag,
       'created_at': instance.createdAt?.toIso8601String(),
       'updated_at': instance.updatedAt?.toIso8601String(),
     };

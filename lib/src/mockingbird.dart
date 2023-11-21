@@ -47,6 +47,8 @@ class Mockingbird extends ChangeNotifier implements EventHandler {
     "channels",
     "subscribers",
     "messages",
+    "message_likes",
+    "message_tags",
     "contacts",
     "users",
   ];

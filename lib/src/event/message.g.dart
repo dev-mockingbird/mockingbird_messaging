@@ -69,3 +69,27 @@ Map<String, dynamic> _$ViewMessageToJson(ViewMessage instance) =>
       'message_id': instance.messageId,
       'user_id': instance.userId,
     };
+
+LikeMessage _$LikeMessageFromJson(Map<String, dynamic> json) => LikeMessage(
+      messageId: json['message_id'] as String,
+      amount: json['amount'] as int,
+    );
+
+Map<String, dynamic> _$LikeMessageToJson(LikeMessage instance) =>
+    <String, dynamic>{
+      'message_id': instance.messageId,
+      'amount': instance.amount,
+    };
+
+TagMessage _$TagMessageFromJson(Map<String, dynamic> json) => TagMessage(
+      messageId: json['message_id'] as String,
+      tag: json['tag'] as String,
+      untag: json['untag'] as bool? ?? false,
+    );
+
+Map<String, dynamic> _$TagMessageToJson(TagMessage instance) =>
+    <String, dynamic>{
+      'message_id': instance.messageId,
+      'tag': instance.tag,
+      'untag': instance.untag,
+    };

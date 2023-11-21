@@ -8,24 +8,12 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockingbird_messaging/src/file_manager.dart';
-import 'package:mockingbird_messaging/src/mockingbird.dart';
-import 'package:mockingbird_messaging/src/encoding/encoding.dart';
-import 'package:mockingbird_messaging/src/event/channel.dart';
-import 'package:mockingbird_messaging/src/event/event.dart';
-import 'package:mockingbird_messaging/src/event/message.dart';
-import 'package:mockingbird_messaging/src/http_helper.dart';
-import 'package:mockingbird_messaging/src/protocol/miaoba/miaoba.dart';
-import 'package:mockingbird_messaging/src/protocol/miaoba/server_options.dart';
-import 'package:mockingbird_messaging/src/storage/sqlite.dart';
-import 'package:mockingbird_messaging/src/transport/transport.dart';
-import 'package:mockingbird_messaging/src/transport/websocket.dart';
-import 'package:mockingbird_messaging/src/user_manager.dart';
+import 'package:mockingbird_messaging/mockingbird_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<Mockingbird> installService(String token) async {
-  // var transport = TcpTransport(ip: "127.0.0.1", port: 7001);
-  var transport = WebsocketTransport("ws://127.0.0.1:9000/ws");
+  var transport = TcpTransport(ip: "127.0.0.1", port: 7001);
+  // var transport = WebsocketTransport("ws://127.0.0.1:9000/ws");
   return await installServiceWithTransport(token, transport);
 }
 
@@ -39,6 +27,27 @@ Future<Mockingbird> installServiceWithTransport(
     cryptoMethod: AcceptCrypto.methodAesRsaSha256,
     token: token,
   );
+  var completer = Completer();
+  Mockingbird.instance.addListener(() {
+    switch (Mockingbird.instance.state) {
+      case MockingbirdState.unconnect:
+        print("unconnect");
+        break;
+      case MockingbirdState.connecting:
+        print("connecting");
+        break;
+      case MockingbirdState.connected:
+        print("connected");
+        break;
+      case MockingbirdState.modelSyncing:
+        print("model syncing");
+        break;
+      case MockingbirdState.modelSynced:
+        print("model synced");
+        completer.complete();
+        break;
+    }
+  });
   Mockingbird.instance.addEventListener((Event e) {
     print("${e.type}: ${e.payload}");
   });
@@ -53,6 +62,7 @@ Future<Mockingbird> installServiceWithTransport(
         "${Mockingbird.instance.lastCode}: ${Mockingbird.instance.lastError}");
     throw Mockingbird.instance.lastError;
   }
+  await completer.future;
   return Mockingbird.instance;
 }
 
@@ -159,69 +169,34 @@ void main() async {
       )));
       await Future.delayed(const Duration(hours: 1));
     });
-    test("connection not stable", () async {
+    test("like message", () async {
       SharedPreferences.setMockInitialValues({});
       WidgetsFlutterBinding.ensureInitialized();
-      var completer = Completer();
-      Mockingbird.instance.addListener(() {
-        switch (Mockingbird.instance.state) {
-          case MockingbirdState.unconnect:
-            print("unconnect");
-            break;
-          case MockingbirdState.connecting:
-            print("connecting");
-            break;
-          case MockingbirdState.connected:
-            print("connected");
-            break;
-          case MockingbirdState.modelSyncing:
-            print("model syncing");
-            break;
-          case MockingbirdState.modelSynced:
-            print("model synced");
-            completer.complete();
-            break;
-        }
-      });
       Mockingbird mockingbird =
           await installService("MDAwMDA1ZXAycHVpaXRqNA==");
-      var i = 0;
-      await completer.future;
-      Timer.periodic(const Duration(seconds: 3), (timer) async {
-        if (!await mockingbird.send(Event(type: "test-$i"))) {
-          print("could send event: $i");
-        }
-        i++;
-      });
+      var r = await mockingbird.send(
+        buildEvent(LikeMessage.unlike(messageId: "00000531kypbp79c")),
+        waitResult: true,
+      );
+      await Future.delayed(const Duration(hours: 1));
+    });
+    test("tag message", () async {
+      SharedPreferences.setMockInitialValues({});
+      WidgetsFlutterBinding.ensureInitialized();
+      Mockingbird mockingbird =
+          await installService("MDAwMDA1ZXAycHVpaXRqNA==");
+      var r = await mockingbird.send(
+        buildEvent(
+            TagMessage(messageId: "00000531kypbp79c", tag: 'hello world')),
+        waitResult: true,
+      );
       await Future.delayed(const Duration(hours: 1));
     });
     test("reconnect", () async {
       SharedPreferences.setMockInitialValues({});
       WidgetsFlutterBinding.ensureInitialized();
-      var completer = Completer();
-      Mockingbird.instance.addListener(() {
-        switch (Mockingbird.instance.state) {
-          case MockingbirdState.unconnect:
-            print("unconnect");
-            break;
-          case MockingbirdState.connecting:
-            print("connecting");
-            break;
-          case MockingbirdState.connected:
-            print("connected");
-            break;
-          case MockingbirdState.modelSyncing:
-            print("model syncing");
-            break;
-          case MockingbirdState.modelSynced:
-            print("model synced");
-            completer.complete();
-            break;
-        }
-      });
       Mockingbird mockingbird =
           await installService("MDAwMDA1ZXAycHVpaXRqNA==");
-      await completer.future;
       await mockingbird.stop();
       var miaoba = Miaoba(
         transport: WebsocketTransport("ws://127.0.0.1:9000/ws"),

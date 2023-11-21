@@ -4,19 +4,18 @@
 // https://opensource.org/licenses/MIT
 
 import 'dart:convert';
-
 import 'package:json_annotation/json_annotation.dart';
 import 'package:mockingbird_messaging/src/storage/sqlite.dart';
 part 'message.g.dart';
 
-const typeText = "text";
-const typeMedia = "media";
-const typeFile = "file";
-const typeCustom = "custom";
-const typeInputing = "inputing";
-
 @JsonSerializable(fieldRename: FieldRename.snake)
 class Message extends SqliteModel {
+  static const typeText = "text";
+  static const typeMedia = "media";
+  static const typeFile = "file";
+  static const typeCustom = "custom";
+  static const typeInputing = "inputing";
+
   static const String stableName = "messages";
   static const List<String> fields = [
     'id TEXT PRIMARY KEY',
@@ -37,6 +36,7 @@ class Message extends SqliteModel {
   String? prevId;
   dynamic content;
   String creatorId;
+  String? referMessageId;
   DateTime? createdAt;
   DateTime? updatedAt;
   Message({
@@ -45,6 +45,7 @@ class Message extends SqliteModel {
     required this.type,
     required this.content,
     required this.creatorId,
+    this.referMessageId,
     this.prevId,
     this.createdAt,
     this.updatedAt,

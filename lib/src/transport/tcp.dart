@@ -5,12 +5,16 @@
 
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 
 import 'transport.dart';
 
 class TcpTransport extends Transport {
+  static const RT = 10;
+
   String ip;
   int port;
+  final List<int> _stash = [];
   Function(Transport)? onDone;
   bool _normalStop = false;
 
@@ -38,8 +42,24 @@ class TcpTransport extends Transport {
       return;
     }
     Socket sock = await socket();
+    _stash.clear();
     sock.listen((m) {
-      handle(Uint8List.fromList(m), this);
+      if (kDebugMode) {
+        print("received: ${String.fromCharCodes(m)}");
+      }
+      for (var c in m) {
+        if (c != RT) {
+          _stash.add(c);
+          continue;
+        }
+        var p = Uint8List.fromList(_stash);
+        handle(p, this);
+        _stash.clear();
+      }
+    }, onError: (e) {
+      if (kDebugMode) {
+        print(e);
+      }
     }, onDone: () {
       _state = TransportConnectState.unconnected;
       if (_normalStop) {
@@ -53,12 +73,13 @@ class TcpTransport extends Transport {
 
   @override
   Future<bool> sendPacket(Packet packet) async {
-    if (_state == TransportConnectState.connected) {
-      Socket sock = await socket();
-      sock.write(packet);
-      return true;
+    Socket sock = await socket();
+    String p = String.fromCharCodes(packet);
+    if (kDebugMode) {
+      print("send: $p");
     }
-    return false;
+    sock.write("$p\n");
+    return true;
   }
 
   socket() async {

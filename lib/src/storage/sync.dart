@@ -13,6 +13,8 @@ class SyncDB {
     "channels",
     "subscribers",
     "messages",
+    "message_likes",
+    "message_tags",
     "users",
     "contacts",
   ];

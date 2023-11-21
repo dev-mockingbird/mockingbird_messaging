@@ -17,6 +17,7 @@ export 'src/event/message.dart';
 export 'src/event/subscribe.dart';
 export 'src/protocol/miaoba/miaoba.dart';
 export 'src/transport/tcp.dart';
+export 'src/transport/transport.dart';
 export 'src/protocol/miaoba/server_options.dart';
 export 'src/transport/websocket.dart';
 export 'src/storage/model/channel.dart';
