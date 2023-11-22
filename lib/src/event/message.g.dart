@@ -26,6 +26,7 @@ CreateMessage _$CreateMessageFromJson(Map<String, dynamic> json) =>
       channelId: json['channel_id'] as String,
       content: json['content'] as String,
       contentType: json['content_type'] as String,
+      referMessageId: json['refer_message_id'] as String?,
     );
 
 Map<String, dynamic> _$CreateMessageToJson(CreateMessage instance) =>
@@ -33,6 +34,7 @@ Map<String, dynamic> _$CreateMessageToJson(CreateMessage instance) =>
       'channel_id': instance.channelId,
       'content_type': instance.contentType,
       'content': instance.content,
+      'refer_message_id': instance.referMessageId,
     };
 
 UpdateMessage _$UpdateMessageFromJson(Map<String, dynamic> json) =>

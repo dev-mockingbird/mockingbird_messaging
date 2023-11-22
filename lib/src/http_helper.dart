@@ -160,7 +160,7 @@ class DioHelper {
   }
 
   // 错误处理
-  void _errorHandler(Object error, HandleError? showError) async {
+  void _errorHandler(Object error, HandleError? showError) {
     if (error is! DioException) {
       if (kDebugMode) {
         print(error);

@@ -42,11 +42,13 @@ class CreateMessage extends Payload {
   String channelId;
   String contentType;
   String content;
+  String? referMessageId;
 
   CreateMessage({
     required this.channelId,
     required this.content,
     required this.contentType,
+    this.referMessageId,
   });
 
   factory CreateMessage.fromJson(Map<String, dynamic> json) =>

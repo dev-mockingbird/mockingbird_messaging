@@ -9,6 +9,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockingbird_messaging/mockingbird_messaging.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<Mockingbird> installService(String token) async {
@@ -212,6 +213,22 @@ void main() async {
       );
       await mockingbird.stop();
       await Future.delayed(const Duration(hours: 1));
+    });
+
+    test("download", () async {
+      SharedPreferences.setMockInitialValues({});
+      WidgetsFlutterBinding.ensureInitialized();
+      var fileManger = HttpFileManager(
+        helper: DioHelper(domain: "http://127.0.0.1:9000"),
+      );
+      try {
+        await fileManger.download(
+          "/hello/world",
+          "/hello/world",
+        );
+      } catch (e) {
+        print(e);
+      }
     });
   });
 }

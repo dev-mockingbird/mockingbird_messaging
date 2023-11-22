@@ -36,7 +36,7 @@ class FileCacher {
     Directory dir = await getApplicationCacheDirectory();
     var pathfile = "${dir.path}/${info.md5sum ?? info.id}";
     final file = File(pathfile);
-    if (await file.exists()) {
+    if (await file.exists() && await file.length() > 0) {
       _cachedFiles[id] = pathfile;
       return file;
     }
@@ -46,14 +46,15 @@ class FileCacher {
         pathfile,
         receiveCallback: receiveCallback,
       );
+      _cachedFiles[id] = pathfile;
+      return file;
     } catch (e) {
+      await uncacheFileInfo(id);
       if (kDebugMode) {
         print(e);
       }
       return null;
     }
-    _cachedFiles[id] = pathfile;
-    return file;
   }
 
   FileInfo? cachedFileInfo(String id) {
@@ -78,5 +79,18 @@ class FileCacher {
     _cachedFileInfos[id] = info;
     await KV.save(id, jsonEncode(info));
     return info;
+  }
+
+  Future<bool> uncacheFileInfo(String id) async {
+    try {
+      _cachedFileInfos.remove(id);
+      await KV.remove(id);
+      return true;
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
+      return false;
+    }
   }
 }

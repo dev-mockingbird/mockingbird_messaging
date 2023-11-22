@@ -3,6 +3,8 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
+import 'package:flutter/foundation.dart';
+
 import 'fileinfo.dart';
 import 'http_helper.dart';
 
@@ -52,17 +54,24 @@ class HttpFileManager extends FileManager {
     Function(int sent, int total)? onSent,
     Function(dynamic)? onFail,
   }) async {
-    var res = await helper.upload(
-      '/files/$id',
-      file,
-      method: 'put',
-      onSent: onSent,
-      handleError: onFail,
-    );
-    if (res != null) {
-      return FileInfo.fromJson(res['data']);
+    try {
+      var res = await helper.upload(
+        '/files/$id',
+        file,
+        method: 'put',
+        onSent: onSent,
+        handleError: onFail,
+      );
+      if (res != null) {
+        return FileInfo.fromJson(res['data']);
+      }
+      return null;
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
+      return null;
     }
-    return null;
   }
 
   @override
@@ -84,20 +93,27 @@ class HttpFileManager extends FileManager {
 
   @override
   Future<FileInfo?> getFileInfo(String id) async {
-    final res = await helper.get('/files/$id');
-    if (res == null) {
+    try {
+      final res = await helper.get('/files/$id');
+      if (res == null) {
+        return null;
+      }
+      var raw = res['data']['info'];
+      if (raw != null) {
+        var info = FileInfo.fromJson(raw);
+        info.accessUrl = res['data']['access_url'];
+        return info;
+      }
+      return FileInfo(
+        id: id,
+        mimeType: "unknown",
+        accessUrl: res['data']['access_url'],
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
       return null;
     }
-    var raw = res['data']['info'];
-    if (raw != null) {
-      var info = FileInfo.fromJson(raw);
-      info.accessUrl = res['data']['access_url'];
-      return info;
-    }
-    return FileInfo(
-      id: id,
-      mimeType: "unknown",
-      accessUrl: res['data']['access_url'],
-    );
   }
 }
