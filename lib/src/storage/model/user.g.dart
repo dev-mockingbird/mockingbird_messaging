@@ -28,6 +28,7 @@ Map<String, dynamic> _$NamedAvatarToJson(NamedAvatar instance) =>
 User _$UserFromJson(Map<String, dynamic> json) => User(
       id: json['id'] as String,
       name: json['name'] as String?,
+      countryCode: json['country_code'] as String,
       createdAt: json['created_at'] == null
           ? null
           : DateTime.parse(json['created_at'] as String),
@@ -44,5 +45,6 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'created_at': instance.createdAt?.toIso8601String(),
       'email_addr': instance.emailAddr,
       'phone_number': instance.phoneNumber,
+      'country_code': instance.countryCode,
       'name': instance.name,
     };

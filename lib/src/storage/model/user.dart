@@ -46,6 +46,7 @@ class NamedAvatar {
 class User extends NamedAvatar {
   String? emailAddr;
   String? phoneNumber;
+  String countryCode;
 
   static String stableName = "users";
 
@@ -54,6 +55,7 @@ class User extends NamedAvatar {
     fields.addAll([
       "email_addr TEXT",
       "phone_number TEXT",
+      "country_code TEXT",
     ]);
     return fields;
   }
@@ -61,6 +63,7 @@ class User extends NamedAvatar {
   User({
     required super.id,
     required super.name,
+    required this.countryCode,
     super.createdAt,
     super.avatarUrl,
     super.nickname,

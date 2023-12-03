@@ -9,7 +9,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockingbird_messaging/mockingbird_messaging.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<Mockingbird> installService(String token) async {
@@ -88,8 +87,14 @@ void main() async {
     test("signup", () async {
       UserManager um = HttpUserManager(helper: getDioHelper());
       try {
-        await um.signup("yangzhong", "958898012@qq.com", ContactType.email,
-            "588136", "yZ123456");
+        await um.signup(
+          "yangzhong",
+          "CN",
+          "958898012@qq.com",
+          ContactType.email,
+          "588136",
+          "yZ123456",
+        );
       } catch (e) {
         print(e);
       }

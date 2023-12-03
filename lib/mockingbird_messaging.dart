@@ -6,6 +6,7 @@
 library mackingbird_messaging;
 
 export 'src/file_manager.dart';
+export 'src/country_fetch.dart';
 export 'src/file_upload.dart';
 export 'src/fileinfo.dart';
 export 'src/http_helper.dart';

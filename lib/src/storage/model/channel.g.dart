@@ -8,10 +8,12 @@ part of 'channel.dart';
 
 Channel _$ChannelFromJson(Map<String, dynamic> json) => Channel(
       id: json['id'] as String,
+      countryCode: json['country_code'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
       readMaxRole: json['read_max_role'] as int,
       writeMaxRole: json['write_max_role'] as int,
       name: json['name'] as String,
+      channelId: json['channel_id'] as String?,
       nickname: json['nickname'] as String?,
       avatarUrl: json['avatar_url'] as String?,
       peerUserId: json['peer_user_id'] as String?,
@@ -32,6 +34,8 @@ Channel _$ChannelFromJson(Map<String, dynamic> json) => Channel(
 
 Map<String, dynamic> _$ChannelToJson(Channel instance) => <String, dynamic>{
       'id': instance.id,
+      'country_code': instance.countryCode,
+      'channel_id': instance.channelId,
       'name': instance.name,
       'nickname': instance.nickname,
       'avatar_url': instance.avatarUrl,

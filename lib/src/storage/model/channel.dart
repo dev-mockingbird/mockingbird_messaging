@@ -11,6 +11,8 @@ part 'channel.g.dart';
 class Channel extends SqliteModel {
   static const String stableName = "channels";
   String id;
+  String countryCode;
+  String? channelId;
   String name;
   String? nickname;
   String? avatarUrl;
@@ -32,6 +34,8 @@ class Channel extends SqliteModel {
 
   static const List<String> fields = [
     "id TEXT PRIMARY KEY",
+    "channel_id TEXT",
+    "country_code TEXT",
     "parent_id TEXT",
     "parent_type TEXT",
     "name TEXT",
@@ -61,10 +65,12 @@ class Channel extends SqliteModel {
 
   Channel({
     required this.id,
+    required this.countryCode,
     required this.createdAt,
     required this.readMaxRole,
     required this.writeMaxRole,
     required this.name,
+    this.channelId,
     this.nickname,
     this.avatarUrl,
     this.peerUserId,

@@ -32,6 +32,7 @@ class LoginUser {
 abstract class UserManager {
   Future<LoginUser?> signup(
     String username,
+    String countryCode,
     String contact,
     ContactType contactType,
     String verifyCode,
@@ -80,8 +81,11 @@ class HttpUserManager extends UserManager {
   DioHelper helper;
   HttpUserManager({required this.helper});
   @override
-  Future<bool> changePasswordByOldPassword(String password, String oldPassword,
-      {HandleError? onError}) async {
+  Future<bool> changePasswordByOldPassword(
+    String password,
+    String oldPassword, {
+    HandleError? onError,
+  }) async {
     return await helper.put("/password/by-old-password",
             data: {
               "old_password": oldPassword,
@@ -92,9 +96,13 @@ class HttpUserManager extends UserManager {
   }
 
   @override
-  Future<bool> changePasswordByVerifyCode(String password,
-      ContactType contactType, String contact, String verifyCode,
-      {HandleError? onError}) async {
+  Future<bool> changePasswordByVerifyCode(
+    String password,
+    ContactType contactType,
+    String contact,
+    String verifyCode, {
+    HandleError? onError,
+  }) async {
     return await helper.put("/password/by-verify-code",
             data: {
               "new_password": password,
@@ -149,13 +157,20 @@ class HttpUserManager extends UserManager {
   }
 
   @override
-  Future<LoginUser?> signup(String username, String contact,
-      ContactType contactType, String verifyCode, String password,
-      {HandleError? onError}) async {
+  Future<LoginUser?> signup(
+    String username,
+    String countryCode,
+    String contact,
+    ContactType contactType,
+    String verifyCode,
+    String password, {
+    HandleError? onError,
+  }) async {
     var res = await helper.post('/signup',
         data: {
           "name": username,
           "contact": contact,
+          "country_code": countryCode,
           "contact_type": contactTypes[contactType],
           "verify_code": verifyCode,
           "password": password,
