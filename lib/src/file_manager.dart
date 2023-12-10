@@ -9,14 +9,17 @@ import 'fileinfo.dart';
 import 'http_helper.dart';
 
 enum ImageSize {
+  xs,
   sm,
   md,
   lg,
   origin,
 }
 
-getImageSize(ImageSize size) {
+getImageSizeName(ImageSize size) {
   switch (size) {
+    case ImageSize.xs:
+      return "xs";
     case ImageSize.sm:
       return "sm";
     case ImageSize.md:
@@ -26,6 +29,21 @@ getImageSize(ImageSize size) {
     default:
       return "origin";
   }
+}
+
+ImageSize? getImageSize(double? width) {
+  if (width == null) {
+    return null;
+  } else if (width <= 192) {
+    return ImageSize.xs;
+  } else if (width <= 480) {
+    return ImageSize.sm;
+  } else if (width <= 720) {
+    return ImageSize.md;
+  } else if (width <= 1080) {
+    return ImageSize.lg;
+  }
+  return ImageSize.origin;
 }
 
 abstract class FileManager {
@@ -105,7 +123,7 @@ class HttpFileManager extends FileManager {
     ImageSize imageSize = ImageSize.md,
   }) async {
     return await helper.download(
-      "$path?size=${getImageSize(imageSize)}",
+      "$path?size=${getImageSizeName(imageSize)}",
       savePath,
       receiveCallback: receiveCallback,
       data: data,
