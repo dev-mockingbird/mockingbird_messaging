@@ -8,6 +8,26 @@ import 'package:flutter/foundation.dart';
 import 'fileinfo.dart';
 import 'http_helper.dart';
 
+enum ImageSize {
+  sm,
+  md,
+  lg,
+  origin,
+}
+
+getImageSize(ImageSize size) {
+  switch (size) {
+    case ImageSize.sm:
+      return "sm";
+    case ImageSize.md:
+      return "md";
+    case ImageSize.lg:
+      return "lg";
+    default:
+      return "origin";
+  }
+}
+
 abstract class FileManager {
   Future<String?> createFileId();
   Future<FileInfo?> upload(
@@ -24,6 +44,7 @@ abstract class FileManager {
     void Function(int, int)? receiveCallback,
     Map<String, dynamic>? data,
     HandleError? handleError,
+    ImageSize imageSize = ImageSize.md,
   });
 
   Future<String?> getAccessUrl(String id);
@@ -81,9 +102,10 @@ class HttpFileManager extends FileManager {
     void Function(int, int)? receiveCallback,
     Map<String, dynamic>? data,
     HandleError? handleError,
+    ImageSize imageSize = ImageSize.md,
   }) async {
     return await helper.download(
-      path,
+      "$path?size=${getImageSize(imageSize)}",
       savePath,
       receiveCallback: receiveCallback,
       data: data,

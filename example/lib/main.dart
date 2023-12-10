@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -68,6 +69,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
   String fileInfos = "";
+  File? _file;
   TextEditingController controller = TextEditingController();
 
   void _incrementCounter() {
@@ -136,15 +138,25 @@ class _MyHomePageState extends State<MyHomePage> {
             Text(fileInfos),
             TextField(controller: controller),
             ElevatedButton(
-                onPressed: () {
-                  var cacher = FileCacher(
-                    fileManager: HttpFileManager(
-                      helper: DioHelper(domain: "http://127.0.0.1:9000"),
-                    ),
-                  );
-                  cacher.cacheFile(controller.text, (p1, p2) {});
-                },
-                child: const Text("下载图片")),
+              onPressed: () async {
+                var cacher = FileCacher(
+                  fileManager: HttpFileManager(
+                    helper: DioHelper(domain: "http://127.0.0.1:9000"),
+                  ),
+                );
+                var file = await cacher.cacheFile(
+                  controller.text,
+                  size: ImageSize.origin,
+                );
+                if (file != null) {
+                  setState(() {
+                    _file = file;
+                  });
+                }
+              },
+              child: const Text("下载图片"),
+            ),
+            if (_file != null) Image.file(_file!),
           ],
         ),
       ),

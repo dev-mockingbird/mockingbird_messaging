@@ -29,6 +29,7 @@ export 'src/storage/model/subscriber.dart';
 export 'src/storage/model/message_tag.dart';
 export 'src/storage/model/message_like.dart';
 export 'src/storage/model/user.dart';
+export 'src/storage/model/country.dart';
 export 'src/storage/file.dart';
 export 'src/storage/kv.dart';
 export 'src/storage/sqlite.dart';

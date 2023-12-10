@@ -51,14 +51,40 @@ abstract class UserManager {
 
   Future<List<User>?> search(String keyword);
 
-  Future<bool> sendVerifyCode(ContactType contactType, String contact);
-  Future<AccountType?> verifyAccount(String account, {HandleError? onError});
-  Future<bool> changePasswordByOldPassword(String password, String oldPassword,
-      {HandleError? onError});
+  Future<bool> sendVerifyCode(
+    ContactType contactType,
+    String contact,
+  );
+  Future<AccountType?> verifyAccount(
+    String account, {
+    HandleError? onError,
+  });
+  Future<bool> changePasswordByOldPassword(
+    String password,
+    String oldPassword, {
+    HandleError? onError,
+  });
 
-  Future<bool> changePasswordByVerifyCode(String password,
-      ContactType contactType, String contact, String verifyCode,
-      {HandleError? onError});
+  Future<bool> changePasswordByVerifyCode(
+    String password,
+    ContactType contactType,
+    String contact,
+    String verifyCode, {
+    HandleError? onError,
+  });
+
+  Future<bool> updateInfo({
+    String? nickname,
+    String? avatarUrl,
+    HandleError? onError,
+  });
+
+  Future<bool> updateContact({
+    required ContactType type,
+    required String contact,
+    required String verifyCode,
+    HandleError? onError,
+  });
 }
 
 class HttpUserManager extends UserManager {
@@ -91,7 +117,7 @@ class HttpUserManager extends UserManager {
               "old_password": oldPassword,
               "new_password": password,
             },
-            showError: onError) !=
+            handleError: onError) !=
         null;
   }
 
@@ -110,7 +136,7 @@ class HttpUserManager extends UserManager {
               "contact": contact,
               "verify_code": verifyCode,
             },
-            showError: onError) !=
+            handleError: onError) !=
         null;
   }
 
@@ -202,5 +228,49 @@ class HttpUserManager extends UserManager {
       }
     }
     return null;
+  }
+
+  @override
+  Future<bool> updateInfo({
+    String? nickname,
+    String? avatarUrl,
+    HandleError? onError,
+  }) async {
+    try {
+      await helper.put(
+        "/user-info",
+        data: {
+          "nickname": nickname,
+          "avatar_url": avatarUrl,
+        },
+        handleError: onError,
+      );
+    } catch (e) {
+      return false;
+    }
+    return true;
+  }
+
+  @override
+  Future<bool> updateContact({
+    required ContactType type,
+    required String contact,
+    required String verifyCode,
+    HandleError? onError,
+  }) async {
+    try {
+      await helper.put(
+        "/user-info",
+        data: {
+          "contact_type": contactTypes[type],
+          "contact": contact,
+          "verify_code": verifyCode,
+        },
+        handleError: onError,
+      );
+    } catch (e) {
+      return false;
+    }
+    return true;
   }
 }

@@ -18,26 +18,38 @@ class FileCacher {
 
   FileCacher({required this.fileManager});
 
-  File? cachedFile(String id) {
-    if (_cachedFiles[id] != null) {
-      return File(_cachedFiles[id]!);
-    }
-    return null;
-  }
-
-  Future<File?> cacheFile(
-    String id,
-    void Function(int, int)? receiveCallback,
-  ) async {
+  Future<File?> cachedFile(
+    String id, {
+    ImageSize size = ImageSize.md,
+  }) async {
     FileInfo? info = await cacheFileInfo(id);
     if (info == null) {
       return null;
     }
     Directory dir = await getApplicationCacheDirectory();
-    var pathfile = "${dir.path}/${info.md5sum ?? info.id}";
+    var pathfile = "${dir.path}/${_id(id, size)}";
     final file = File(pathfile);
     if (await file.exists() && await file.length() > 0) {
       _cachedFiles[id] = pathfile;
+      return file;
+    }
+    return null;
+  }
+
+  Future<File?> cacheFile(
+    String id, {
+    ImageSize size = ImageSize.md,
+    void Function(int, int)? receiveCallback,
+  }) async {
+    FileInfo? info = await cacheFileInfo(id);
+    if (info == null) {
+      return null;
+    }
+    Directory dir = await getApplicationCacheDirectory();
+    var pathfile = "${dir.path}/${_id(id, size)}";
+    final file = File(pathfile);
+    if (await file.exists() && await file.length() > 0) {
+      _cachedFiles[_id(id, size)] = pathfile;
       return file;
     }
     try {
@@ -45,8 +57,9 @@ class FileCacher {
         info.accessUrl!,
         pathfile,
         receiveCallback: receiveCallback,
+        imageSize: size,
       );
-      _cachedFiles[id] = pathfile;
+      _cachedFiles[_id(id, size)] = pathfile;
       return file;
     } catch (e) {
       await uncacheFileInfo(id);
@@ -57,12 +70,8 @@ class FileCacher {
     }
   }
 
-  FileInfo? cachedFileInfo(String id) {
-    return _cachedFileInfos[id];
-  }
-
-  Future<FileInfo?> cacheFileInfo(String id) async {
-    var info = cachedFileInfo(id);
+  Future<FileInfo?> cachedFileInfo(String id) async {
+    var info = _cachedFileInfos[id];
     if (info != null) {
       return info;
     }
@@ -70,6 +79,14 @@ class FileCacher {
     if (data != "") {
       FileInfo info = FileInfo.fromJson(jsonDecode(data));
       _cachedFileInfos[id] = info;
+      return info;
+    }
+    return null;
+  }
+
+  Future<FileInfo?> cacheFileInfo(String id) async {
+    var info = await cachedFileInfo(id);
+    if (info != null) {
       return info;
     }
     info = await fileManager.getFileInfo(id);
@@ -92,5 +109,9 @@ class FileCacher {
       }
       return false;
     }
+  }
+
+  String _id(String id, ImageSize size) {
+    return "$id-$size";
   }
 }

@@ -98,7 +98,7 @@ class Sqlite {
     }
     _db = await openDatabase(
       join(path, 'mockingbird_database.db'),
-      version: 8,
+      version: 1,
       onCreate: _initDatabase,
       onUpgrade: _upgrade,
     );

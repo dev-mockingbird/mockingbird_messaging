@@ -34,7 +34,7 @@ class NamedAvatar {
   String get displayName {
     if (nickname != null && nickname != "") {
       return nickname!;
-    } else if (name != null && nickname != "") {
+    } else if (name != null && name != "") {
       return name!;
     } else {
       return id;
@@ -47,12 +47,14 @@ class User extends NamedAvatar {
   String? emailAddr;
   String? phoneNumber;
   String countryCode;
+  DateTime? updatedAt;
 
   static String stableName = "users";
 
   static List<String> get fields {
     List<String> fields = NamedAvatar.fields;
     fields.addAll([
+      "updated_at TEXT",
       "email_addr TEXT",
       "phone_number TEXT",
       "country_code TEXT",
@@ -69,6 +71,7 @@ class User extends NamedAvatar {
     super.nickname,
     this.emailAddr,
     this.phoneNumber,
+    this.updatedAt,
   });
 
   @override

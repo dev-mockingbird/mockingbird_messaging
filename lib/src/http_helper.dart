@@ -83,11 +83,11 @@ class DioHelper {
     String path, {
     Map<String, dynamic>? data,
     Options? options,
-    HandleError? showError,
+    HandleError? handleError,
   }) async {
     return await _do(() async {
       return await dio.put(path, data: data, options: options);
-    }, showError);
+    }, handleError);
   }
 
   // delete
