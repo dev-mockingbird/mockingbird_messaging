@@ -30,10 +30,22 @@ class FileCacher {
     var pathfile = "${dir.path}/${_id(id, size)}";
     final file = File(pathfile);
     if (await file.exists() && await file.length() > 0) {
-      _cachedFiles[id] = pathfile;
+      _cachedFiles[_id(id, size)] = pathfile;
       return file;
     }
     return null;
+  }
+
+  File? syncedFile(String id, {ImageSize size = ImageSize.md}) {
+    var pathfile = _cachedFiles[_id(id, size)];
+    if (pathfile != null) {
+      return File(pathfile);
+    }
+    return null;
+  }
+
+  FileInfo? syncedFileInfo(String id) {
+    return _cachedFileInfos[id];
   }
 
   Future<File?> cacheFile(
