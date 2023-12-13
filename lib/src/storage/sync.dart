@@ -3,6 +3,8 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
+import 'dart:convert';
+
 import 'package:mockingbird_messaging/src/storage/model/model_sync.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -120,6 +122,24 @@ class SyncDB {
     }
     for (var col in ['deleted_at', 'contact_protected']) {
       data = _dropColumn(data, col);
+    }
+    return _jsonData(data);
+  }
+
+  static _jsonData(Map<String, dynamic> data) {
+    for (var col in [
+      'audio',
+      'media',
+      'attachment',
+      'article',
+      'last_message_audio',
+      'last_message_media',
+      'last_message_attachment',
+      'last_message_article'
+    ]) {
+      if (data[col] != null) {
+        data[col] = jsonEncode(data[col]);
+      }
     }
     return data;
   }

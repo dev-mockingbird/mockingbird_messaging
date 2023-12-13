@@ -8,7 +8,6 @@ part of 'message.dart';
 
 TypeMessage _$TypeMessageFromJson(Map<String, dynamic> json) => TypeMessage(
       channelId: json['channel_id'] as String,
-      contentType: json['content_type'] as String,
       content: json['content'] as String,
       userId: json['user_id'] as String,
     );
@@ -17,38 +16,65 @@ Map<String, dynamic> _$TypeMessageToJson(TypeMessage instance) =>
     <String, dynamic>{
       'channel_id': instance.channelId,
       'user_id': instance.userId,
-      'content_type': instance.contentType,
       'content': instance.content,
     };
 
 CreateMessage _$CreateMessageFromJson(Map<String, dynamic> json) =>
     CreateMessage(
       channelId: json['channel_id'] as String,
-      content: json['content'] as String,
-      contentType: json['content_type'] as String,
       referMessageId: json['refer_message_id'] as String?,
+      text: json['text'] as String?,
+      media: (json['media'] as List<dynamic>?)
+          ?.map((e) => MessageMedia.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      article: json['article'] == null
+          ? null
+          : MessageArticle.fromJson(json['article'] as Map<String, dynamic>),
+      audio: json['audio'] == null
+          ? null
+          : MessageAudio.fromJson(json['audio'] as Map<String, dynamic>),
+      attachment: (json['attachment'] as List<dynamic>?)
+          ?.map((e) => MessageFile.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$CreateMessageToJson(CreateMessage instance) =>
     <String, dynamic>{
       'channel_id': instance.channelId,
-      'content_type': instance.contentType,
-      'content': instance.content,
+      'text': instance.text,
+      'media': instance.media,
+      'attachment': instance.attachment,
+      'audio': instance.audio,
+      'article': instance.article,
       'refer_message_id': instance.referMessageId,
     };
 
 UpdateMessage _$UpdateMessageFromJson(Map<String, dynamic> json) =>
     UpdateMessage(
       id: json['id'] as String,
-      content: json['content'] as String,
-      contentType: json['content_type'] as String,
+      text: json['text'] as String?,
+      media: (json['media'] as List<dynamic>?)
+          ?.map((e) => MessageMedia.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      article: json['article'] == null
+          ? null
+          : MessageArticle.fromJson(json['article'] as Map<String, dynamic>),
+      audio: json['audio'] == null
+          ? null
+          : MessageAudio.fromJson(json['audio'] as Map<String, dynamic>),
+      attachment: (json['attachment'] as List<dynamic>?)
+          ?.map((e) => MessageFile.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$UpdateMessageToJson(UpdateMessage instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'content_type': instance.contentType,
-      'content': instance.content,
+      'text': instance.text,
+      'media': instance.media,
+      'attachment': instance.attachment,
+      'audio': instance.audio,
+      'article': instance.article,
     };
 
 DeleteMessage _$DeleteMessageFromJson(Map<String, dynamic> json) =>

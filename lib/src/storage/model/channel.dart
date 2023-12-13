@@ -3,8 +3,12 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
+import 'dart:convert';
+
 import 'package:json_annotation/json_annotation.dart';
 import 'package:mockingbird_messaging/src/storage/sqlite.dart';
+
+import 'message.dart';
 part 'channel.g.dart';
 
 @JsonSerializable(fieldRename: FieldRename.snake)
@@ -23,8 +27,11 @@ class Channel extends SqliteModel {
   int messages;
   String? lastMessageSubscriberId;
   String? lastMessageId;
-  String? lastMessageType;
-  String? lastMessage;
+  String? lastMessageText;
+  List<MessageMedia>? lastMessageMedia;
+  List<MessageAudio>? lastMessageAudio;
+  List<MessageArticle>? lastMessageArticle;
+  List<MessageFile>? lastMessageAttachment;
   String? lastMessageAt;
   String? lastMessagePrevId;
   int? subscribers;
@@ -48,8 +55,11 @@ class Channel extends SqliteModel {
     "messages INTEGER",
     "last_message_subscriber_id TEXT",
     "last_message_id TEXT",
-    "last_message_type TEXT",
-    "last_message TEXT",
+    'last_message_audio TEXT',
+    'last_message_article TEXT',
+    'last_message_attachment TEXT',
+    'last_message_text TEXT',
+    'last_message_media TEXT',
     "last_message_at TEXT",
     "last_message_prev_id TEXT",
     "subscribers INTEGER",
@@ -70,17 +80,20 @@ class Channel extends SqliteModel {
     required this.readMaxRole,
     required this.writeMaxRole,
     required this.name,
+    this.lastMessageText,
+    this.lastMessageMedia,
+    this.lastMessageAudio,
+    this.lastMessageArticle,
+    this.lastMessageAttachment,
     this.channelId,
     this.nickname,
     this.avatarUrl,
     this.peerUserId,
-    this.lastMessage,
     this.description,
     this.messages = 0,
     this.subscribers = 0,
     this.lastMessageSubscriberId,
     this.lastMessageId,
-    this.lastMessageType,
     this.lastMessageAt,
     this.lastMessagePrevId,
   });
@@ -88,6 +101,17 @@ class Channel extends SqliteModel {
   static List<Channel> fromSqlite(List<Map<String, dynamic>> data) {
     List<Channel> ret = [];
     for (var item in data) {
+      var ch = {...item};
+      for (var k in [
+        'last_message_media',
+        'last_message_audio',
+        'last_message_article',
+        'last_message_attachment'
+      ]) {
+        if (ch[k] != null && ch[k] != "") {
+          ch[k] = jsonDecode(ch[k]);
+        }
+      }
       ret.add(Channel.fromJson(item));
     }
     return ret;
@@ -95,7 +119,20 @@ class Channel extends SqliteModel {
 
   @override
   Map<String, dynamic> toSqliteMap() {
-    return toJson();
+    var data = toJson();
+    if (lastMessageAttachment != null) {
+      data['last_message_attachment'] = jsonEncode(lastMessageAttachment);
+    }
+    if (lastMessageAudio != null) {
+      data['last_message_audio'] = jsonEncode(lastMessageAudio);
+    }
+    if (lastMessageArticle != null) {
+      data['last_message_article'] = jsonEncode(lastMessageArticle);
+    }
+    if (lastMessageMedia != null) {
+      data['last_message_media'] = jsonEncode(lastMessageMedia);
+    }
+    return data;
   }
 
   // 反序列化

@@ -4,6 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 import 'package:json_annotation/json_annotation.dart';
+import '../storage/model/message.dart';
 import 'event.dart';
 part 'message.g.dart';
 
@@ -12,12 +13,10 @@ class TypeMessage extends Payload {
   static const String eventType = "channel.typing";
   String channelId;
   String userId;
-  String contentType;
   String content;
 
   TypeMessage({
     required this.channelId,
-    required this.contentType,
     required this.content,
     required this.userId,
   });
@@ -40,15 +39,21 @@ class CreateMessage extends Payload {
   String get type => eventType;
 
   String channelId;
-  String contentType;
-  String content;
+  String? text;
+  List<MessageMedia>? media;
+  List<MessageFile>? attachment;
+  MessageAudio? audio;
+  MessageArticle? article;
   String? referMessageId;
 
   CreateMessage({
     required this.channelId,
-    required this.content,
-    required this.contentType,
     this.referMessageId,
+    this.text,
+    this.media,
+    this.article,
+    this.audio,
+    this.attachment,
   });
 
   factory CreateMessage.fromJson(Map<String, dynamic> json) =>
@@ -65,13 +70,19 @@ class UpdateMessage extends Payload {
   String get type => eventType;
 
   String id;
-  String contentType;
-  String content;
+  String? text;
+  List<MessageMedia>? media;
+  List<MessageFile>? attachment;
+  MessageAudio? audio;
+  MessageArticle? article;
 
   UpdateMessage({
     required this.id,
-    required this.content,
-    required this.contentType,
+    this.text,
+    this.media,
+    this.article,
+    this.audio,
+    this.attachment,
   });
 
   factory UpdateMessage.fromJson(Map<String, dynamic> json) =>

@@ -8,7 +8,18 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
-typedef HandleError = void Function(dynamic);
+class ResponseError {
+  int statusCode;
+  String code;
+  String message;
+  ResponseError({
+    required this.statusCode,
+    required this.code,
+    required this.message,
+  });
+}
+
+typedef HandleError = void Function(ResponseError);
 
 class DioHelper {
   Function(dynamic)? onError;
@@ -24,6 +35,9 @@ class DioHelper {
         baseUrl: domain,
         connectTimeout: const Duration(seconds: 30),
         receiveTimeout: const Duration(seconds: 30),
+        validateStatus: (int? status) {
+          return (status ?? 200) < 500;
+        },
       ),
     );
     if (token != null) {
@@ -45,6 +59,9 @@ class DioHelper {
         contentType: Headers.formUrlEncodedContentType,
         connectTimeout: connectTimeout,
         receiveTimeout: receiveTimeout,
+        validateStatus: (int? status) {
+          return (status ?? 200) < 500;
+        },
         sendTimeout: sendTimeout,
       ),
     );
@@ -150,31 +167,56 @@ class DioHelper {
   ) async {
     try {
       Response res = await d();
-      if (res.data is String) {
-        return jsonDecode(res.data);
+      if (res.statusCode == null || (res.statusCode ?? 200) >= 300) {
+        _handleError(handleError, _parseBody(res));
+        return;
       }
       return res.data;
     } catch (e) {
-      _errorHandler(e, handleError);
+      if (e is! DioException) {
+        if (kDebugMode) {
+          print(e);
+        }
+        return;
+      }
+      if (onError != null) {
+        onError!(e);
+        return;
+      }
+      rethrow;
     }
   }
 
-  // 错误处理
-  void _errorHandler(Object error, HandleError? showError) {
-    if (error is! DioException) {
-      if (kDebugMode) {
-        print(error);
-      }
-      return;
+  _parseBody(Response res) {
+    var err = ResponseError(
+      statusCode: res.statusCode ?? 0,
+      code: "unknown-error",
+      message: "unknown error",
+    );
+    if (res.data is Map) {
+      err.code = res.data["code"] ?? err.code;
+      err.message = res.data["data"]["msg"] ?? err.message;
+      return err;
     }
-    if (showError != null) {
-      showError(error);
-      return;
+    if (res.data is String) {
+      // var contentType = res.headers["Content-Type"];
+      // if (contentType != null &&
+      //     contentType.isNotEmpty &&
+      //     contentType.first == "application/json") {
+      var body = jsonDecode(res.data);
+      err.code = body["code"] ?? err.code;
+      err.message = body["data"]["msg"] ?? err.message;
+      return err;
+      // }
+      // err.message = res.data;
     }
-    if (onError != null) {
-      onError!(error);
-      return;
+    return err;
+  }
+
+  _handleError(HandleError? handle, ResponseError err) {
+    if (handle == null) {
+      throw err;
     }
-    throw error;
+    handle(err);
   }
 }

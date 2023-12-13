@@ -12,8 +12,8 @@ import 'package:mockingbird_messaging/mockingbird_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<Mockingbird> installService(String token) async {
-  var transport = TcpTransport(ip: "127.0.0.1", port: 7001);
-  // var transport = WebsocketTransport("ws://127.0.0.1:9000/ws");
+  // var transport = TcpTransport(ip: "127.0.0.1", port: 7001);
+  var transport = WebsocketTransport("ws://127.0.0.1:9000/ws");
   return await installServiceWithTransport(token, transport);
 }
 
@@ -75,6 +75,7 @@ getDioHelper() {
         } else {
           print(e);
         }
+        throw e;
       });
 }
 
@@ -87,14 +88,10 @@ void main() async {
     test("signup", () async {
       UserManager um = HttpUserManager(helper: getDioHelper());
       try {
-        await um.signup(
-          "yangzhong",
-          "CN",
-          "958898012@qq.com",
-          ContactType.email,
-          "588136",
-          "yZ123456",
-        );
+        await um.signup("yangzhong", "CN", "958898012@qq.com",
+            ContactType.email, "588136", "yZ123456", onError: (err) {
+          print(err);
+        });
       } catch (e) {
         print(e);
       }
@@ -122,12 +119,12 @@ void main() async {
       SharedPreferences.setMockInitialValues({});
       WidgetsFlutterBinding.ensureInitialized();
       Mockingbird mockingbird =
-          await installService("MDAwMDA1cjBubWhjYnVvMA==");
+          await installService("MDAwMDA2enIxeTY5czloYw==");
       Event? r = await mockingbird.send(
         buildEvent(CreateChannel(
           one2one: false,
-          parentId: "000005qz8up72ebk",
-          parentType: "message",
+          // parentId: "000005qz8up72ebk",
+          // parentType: "message",
         )),
         waitResult: true,
         timeout: const Duration(seconds: 20),
@@ -143,11 +140,29 @@ void main() async {
       SharedPreferences.setMockInitialValues({});
       WidgetsFlutterBinding.ensureInitialized();
       Mockingbird mockingbird =
-          await installService("MDAwMDA0eWVnMG1jYnFwcw==");
+          await installService("MDAwMDA2enIxeTY5czloYw==");
       mockingbird.send(buildEvent(CreateMessage(
-        channelId: "000005302j4jaygw",
-        content: "你好",
-        contentType: "text",
+        channelId: "000006zrzdgaxkhs",
+        text: "你好",
+        media: [
+          MessageMedia(
+            id: "xx",
+            mimeType: "image/jpeg",
+            size: 100,
+            width: 400,
+            height: 300,
+          ),
+        ],
+        attachment: [
+          MessageFile(id: "xxxx", mimeType: "image/jpeg", size: 1),
+        ],
+        audio: MessageAudio(
+          id: "xxxxx",
+          mimeType: "xxx",
+          size: 10,
+          length: 1000,
+        ),
+        article: MessageArticle(title: "test", content: "test"),
       )));
       await Future.delayed(const Duration(hours: 1));
     });
@@ -159,7 +174,6 @@ void main() async {
       mockingbird.send(buildEvent(TypeMessage(
         channelId: "000005302j4jaygw",
         content: "你好",
-        contentType: "text",
         userId: '',
       )));
       await Future.delayed(const Duration(hours: 1));
