@@ -171,6 +171,9 @@ class DioHelper {
         _handleError(handleError, _parseBody(res));
         return;
       }
+      if (res.data is String) {
+        return jsonDecode(res.data);
+      }
       return res.data;
     } catch (e) {
       if (e is! DioException) {
