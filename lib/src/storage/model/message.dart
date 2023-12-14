@@ -6,62 +6,9 @@
 import 'dart:convert';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:mockingbird_messaging/src/storage/sqlite.dart';
+
+import '../../../mockingbird_messaging.dart';
 part 'message.g.dart';
-
-@JsonSerializable(fieldRename: FieldRename.snake)
-class MessageFile {
-  String id;
-  String? name;
-  String mimeType;
-  int size;
-  MessageFile({
-    required this.id,
-    required this.mimeType,
-    required this.size,
-    this.name,
-  });
-
-  factory MessageFile.fromJson(Map<String, dynamic> json) =>
-      _$MessageFileFromJson(json);
-  Map<String, dynamic> toJson() => _$MessageFileToJson(this);
-}
-
-@JsonSerializable(fieldRename: FieldRename.snake)
-class MessageAudio extends MessageFile {
-  int length;
-  MessageAudio({
-    required super.id,
-    required super.mimeType,
-    required super.size,
-    required this.length,
-    super.name,
-  });
-
-  factory MessageAudio.fromJson(Map<String, dynamic> json) =>
-      _$MessageAudioFromJson(json);
-  @override
-  Map<String, dynamic> toJson() => _$MessageAudioToJson(this);
-}
-
-@JsonSerializable(fieldRename: FieldRename.snake)
-class MessageMedia extends MessageFile {
-  int? width;
-  int? height;
-
-  MessageMedia({
-    required super.id,
-    required super.mimeType,
-    required super.size,
-    super.name,
-    this.width,
-    this.height,
-  });
-
-  factory MessageMedia.fromJson(Map<String, dynamic> json) =>
-      _$MessageMediaFromJson(json);
-  @override
-  Map<String, dynamic> toJson() => _$MessageMediaToJson(this);
-}
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class MessageArticle {
@@ -100,9 +47,9 @@ class Message extends SqliteModel {
   String channelId;
   String? prevId;
   String? text;
-  List<MessageMedia>? media;
-  List<MessageFile>? attachment;
-  MessageAudio? audio;
+  List<FileInfo>? media;
+  List<FileInfo>? attachment;
+  FileInfo? audio;
   MessageArticle? article;
   String creatorId;
   String? referMessageId;

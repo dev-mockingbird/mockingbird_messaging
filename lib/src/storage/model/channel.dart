@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:mockingbird_messaging/src/storage/sqlite.dart';
 
+import '../../fileinfo.dart';
 import 'message.dart';
 part 'channel.g.dart';
 
@@ -28,10 +29,10 @@ class Channel extends SqliteModel {
   String? lastMessageSubscriberId;
   String? lastMessageId;
   String? lastMessageText;
-  List<MessageMedia>? lastMessageMedia;
-  List<MessageAudio>? lastMessageAudio;
+  List<FileInfo>? lastMessageMedia;
+  List<FileInfo>? lastMessageAudio;
   List<MessageArticle>? lastMessageArticle;
-  List<MessageFile>? lastMessageAttachment;
+  List<FileInfo>? lastMessageAttachment;
   String? lastMessageAt;
   String? lastMessagePrevId;
   int? subscribers;

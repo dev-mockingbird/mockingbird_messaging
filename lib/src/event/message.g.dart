@@ -25,16 +25,16 @@ CreateMessage _$CreateMessageFromJson(Map<String, dynamic> json) =>
       referMessageId: json['refer_message_id'] as String?,
       text: json['text'] as String?,
       media: (json['media'] as List<dynamic>?)
-          ?.map((e) => MessageMedia.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => FileInfo.fromJson(e as Map<String, dynamic>))
           .toList(),
       article: json['article'] == null
           ? null
           : MessageArticle.fromJson(json['article'] as Map<String, dynamic>),
       audio: json['audio'] == null
           ? null
-          : MessageAudio.fromJson(json['audio'] as Map<String, dynamic>),
+          : FileInfo.fromJson(json['audio'] as Map<String, dynamic>),
       attachment: (json['attachment'] as List<dynamic>?)
-          ?.map((e) => MessageFile.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => FileInfo.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 
@@ -54,16 +54,16 @@ UpdateMessage _$UpdateMessageFromJson(Map<String, dynamic> json) =>
       id: json['id'] as String,
       text: json['text'] as String?,
       media: (json['media'] as List<dynamic>?)
-          ?.map((e) => MessageMedia.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => FileInfo.fromJson(e as Map<String, dynamic>))
           .toList(),
       article: json['article'] == null
           ? null
           : MessageArticle.fromJson(json['article'] as Map<String, dynamic>),
       audio: json['audio'] == null
           ? null
-          : MessageAudio.fromJson(json['audio'] as Map<String, dynamic>),
+          : FileInfo.fromJson(json['audio'] as Map<String, dynamic>),
       attachment: (json['attachment'] as List<dynamic>?)
-          ?.map((e) => MessageFile.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => FileInfo.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 

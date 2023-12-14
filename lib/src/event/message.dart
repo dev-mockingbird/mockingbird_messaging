@@ -4,6 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 import 'package:json_annotation/json_annotation.dart';
+import '../fileinfo.dart';
 import '../storage/model/message.dart';
 import 'event.dart';
 part 'message.g.dart';
@@ -40,9 +41,9 @@ class CreateMessage extends Payload {
 
   String channelId;
   String? text;
-  List<MessageMedia>? media;
-  List<MessageFile>? attachment;
-  MessageAudio? audio;
+  List<FileInfo>? media;
+  List<FileInfo>? attachment;
+  FileInfo? audio;
   MessageArticle? article;
   String? referMessageId;
 
@@ -71,9 +72,9 @@ class UpdateMessage extends Payload {
 
   String id;
   String? text;
-  List<MessageMedia>? media;
-  List<MessageFile>? attachment;
-  MessageAudio? audio;
+  List<FileInfo>? media;
+  List<FileInfo>? attachment;
+  FileInfo? audio;
   MessageArticle? article;
 
   UpdateMessage({

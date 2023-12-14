@@ -15,16 +15,16 @@ Channel _$ChannelFromJson(Map<String, dynamic> json) => Channel(
       name: json['name'] as String,
       lastMessageText: json['last_message_text'] as String?,
       lastMessageMedia: (json['last_message_media'] as List<dynamic>?)
-          ?.map((e) => MessageMedia.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => FileInfo.fromJson(e as Map<String, dynamic>))
           .toList(),
       lastMessageAudio: (json['last_message_audio'] as List<dynamic>?)
-          ?.map((e) => MessageAudio.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => FileInfo.fromJson(e as Map<String, dynamic>))
           .toList(),
       lastMessageArticle: (json['last_message_article'] as List<dynamic>?)
           ?.map((e) => MessageArticle.fromJson(e as Map<String, dynamic>))
           .toList(),
       lastMessageAttachment: (json['last_message_attachment'] as List<dynamic>?)
-          ?.map((e) => MessageFile.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => FileInfo.fromJson(e as Map<String, dynamic>))
           .toList(),
       channelId: json['channel_id'] as String?,
       nickname: json['nickname'] as String?,

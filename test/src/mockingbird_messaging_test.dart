@@ -145,22 +145,19 @@ void main() async {
         channelId: "000006zrzdgaxkhs",
         text: "你好",
         media: [
-          MessageMedia(
+          FileInfo(
             id: "xx",
             mimeType: "image/jpeg",
             size: 100,
-            width: 400,
-            height: 300,
           ),
         ],
         attachment: [
-          MessageFile(id: "xxxx", mimeType: "image/jpeg", size: 1),
+          FileInfo(id: "xxxx", mimeType: "image/jpeg", size: 1),
         ],
-        audio: MessageAudio(
+        audio: FileInfo(
           id: "xxxxx",
           mimeType: "xxx",
           size: 10,
-          length: 1000,
         ),
         article: MessageArticle(title: "test", content: "test"),
       )));

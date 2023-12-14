@@ -35,7 +35,10 @@ class ImageInfo {
   int width;
   int height;
 
-  ImageInfo({required this.width, required this.height});
+  ImageInfo({
+    required this.width,
+    required this.height,
+  });
 
   factory ImageInfo.fromJson(Map<String, dynamic> json) =>
       _$ImageInfoFromJson(json);
