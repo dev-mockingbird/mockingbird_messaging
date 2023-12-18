@@ -64,15 +64,17 @@ class FileCacher {
       _cachedFiles[_id(id, size)] = pathfile;
       return file;
     }
+    var tmpFile = "$pathfile.tmp";
     try {
       await fileManager.download(
         info.accessUrl!,
-        pathfile,
+        tmpFile,
         receiveCallback: receiveCallback,
         imageSize: size,
       );
-      _cachedFiles[_id(id, size)] = pathfile;
-      return file;
+      var r = File(tmpFile).renameSync(pathfile);
+      _cachedFiles[_id(id, size)] = r.path;
+      return r;
     } catch (e) {
       await uncacheFileInfo(id);
       if (kDebugMode) {
