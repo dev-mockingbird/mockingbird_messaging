@@ -17,6 +17,7 @@ class FileUploader {
     List<XFile> files, {
     Function(XFile file, int sent, int total)? onSent,
     Function(XFile file, int code, String info)? onFail,
+    Function(FileInfo file)? onSucess,
   }) async {
     List<Future> fs = [];
     List<FileInfo?> infos = [];
@@ -43,8 +44,12 @@ class FileUploader {
         }
         onFail!(file, 3, "$err");
       });
-      if (info != null) {
-        infos.add(info);
+      if (info == null) {
+        return;
+      }
+      infos.add(info);
+      if (onSucess != null) {
+        onSucess(info);
       }
     }
 
