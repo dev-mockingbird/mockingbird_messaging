@@ -71,17 +71,18 @@ class SyncDB {
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  static Map<String, dynamic> _fixNullableColumn(
+  static Map<String, dynamic> _fixNullableTimeColumn(
     Map<String, dynamic> data,
     String name,
   ) {
     if (data[name] == null) {
       return data;
-    }
-    if (data[name]["Valid"] ?? false) {
-      data[name] = data[name]["Time"];
-    } else {
-      data[name] = null;
+    } else if (data[name] is Map) {
+      if (data[name]["Valid"] ?? false) {
+        data[name] = data[name]["Time"];
+      } else {
+        data[name] = null;
+      }
     }
     return data;
   }
@@ -115,7 +116,7 @@ class SyncDB {
 
   static Map<String, dynamic> _fixData(Map<String, dynamic> data) {
     for (var col in ['last_read_message_at', 'last_message_at']) {
-      data = _fixNullableColumn(data, col);
+      data = _fixNullableTimeColumn(data, col);
     }
     for (var col in ['online']) {
       data = _fixBooleanColumn(data, col);
