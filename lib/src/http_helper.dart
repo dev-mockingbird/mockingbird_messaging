@@ -36,7 +36,7 @@ class DioHelper {
         connectTimeout: const Duration(seconds: 30),
         receiveTimeout: const Duration(seconds: 30),
         validateStatus: (int? status) {
-          return (status ?? 200) < 500;
+          return true;
         },
       ),
     );
@@ -60,7 +60,7 @@ class DioHelper {
         connectTimeout: connectTimeout,
         receiveTimeout: receiveTimeout,
         validateStatus: (int? status) {
-          return (status ?? 200) < 500;
+          return true;
         },
         sendTimeout: sendTimeout,
       ),
