@@ -123,6 +123,7 @@ void main() async {
       Event? r = await mockingbird.send(
         buildEvent(CreateChannel(
           one2one: false,
+          channelType: Channel.typeChannel,
           // parentId: "000005qz8up72ebk",
           // parentType: "message",
         )),

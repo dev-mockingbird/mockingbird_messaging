@@ -15,6 +15,8 @@ class CreateChannel extends Payload {
     return eventType;
   }
 
+  @JsonKey(name: "type")
+  String channelType;
   bool one2one;
   String? name;
   String? description;
@@ -28,6 +30,7 @@ class CreateChannel extends Payload {
   List<String>? subscribeUserIds;
 
   CreateChannel({
+    required this.channelType,
     required this.one2one,
     this.subscribeUserIds,
     this.name,

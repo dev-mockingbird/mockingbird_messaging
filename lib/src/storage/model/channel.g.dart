@@ -13,6 +13,7 @@ Channel _$ChannelFromJson(Map<String, dynamic> json) => Channel(
       readMaxRole: json['read_max_role'] as int,
       writeMaxRole: json['write_max_role'] as int,
       name: json['name'] as String,
+      type: json['type'] as String,
       lastMessageText: json['last_message_text'] as String?,
       lastMessageMedia: (json['last_message_media'] as List<dynamic>?)
           ?.map((e) => FileInfo.fromJson(e as Map<String, dynamic>))
@@ -52,6 +53,7 @@ Map<String, dynamic> _$ChannelToJson(Channel instance) => <String, dynamic>{
       'avatar_url': instance.avatarUrl,
       'description': instance.description,
       'peer_user_id': instance.peerUserId,
+      'type': instance.type,
       'write_max_role': instance.writeMaxRole,
       'read_max_role': instance.readMaxRole,
       'messages': instance.messages,

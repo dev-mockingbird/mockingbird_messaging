@@ -22,6 +22,9 @@ class FileCacher {
     String id, {
     ImageSize size = ImageSize.md,
   }) async {
+    if (kIsWeb) {
+      return null;
+    }
     FileInfo? info = await cacheFileInfo(id);
     if (info == null) {
       return null;
@@ -53,6 +56,9 @@ class FileCacher {
     ImageSize size = ImageSize.md,
     void Function(int, int)? receiveCallback,
   }) async {
+    if (kIsWeb) {
+      throw Exception("not support cache file in web");
+    }
     FileInfo? info = await cacheFileInfo(id);
     if (info == null) {
       return null;

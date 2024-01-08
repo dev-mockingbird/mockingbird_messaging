@@ -8,6 +8,7 @@ part of 'channel.dart';
 
 CreateChannel _$CreateChannelFromJson(Map<String, dynamic> json) =>
     CreateChannel(
+      channelType: json['type'] as String,
       one2one: json['one2one'] as bool,
       subscribeUserIds: (json['subscribe_user_ids'] as List<dynamic>?)
           ?.map((e) => e as String)
@@ -25,6 +26,7 @@ CreateChannel _$CreateChannelFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$CreateChannelToJson(CreateChannel instance) =>
     <String, dynamic>{
+      'type': instance.channelType,
       'one2one': instance.one2one,
       'name': instance.name,
       'description': instance.description,

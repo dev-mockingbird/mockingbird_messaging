@@ -14,6 +14,9 @@ part 'channel.g.dart';
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class Channel extends SqliteModel {
+  static const String typeChannel = "channel";
+  static const String typeGroup = "group";
+  static const String typeChat = "chat";
   static const String stableName = "channels";
   String id;
   String countryCode;
@@ -23,6 +26,7 @@ class Channel extends SqliteModel {
   String? avatarUrl;
   String? description;
   String? peerUserId;
+  String type;
   int writeMaxRole;
   int readMaxRole;
   int messages;
@@ -42,6 +46,7 @@ class Channel extends SqliteModel {
 
   static const List<String> fields = [
     "id TEXT PRIMARY KEY",
+    "type TEXT",
     "channel_id TEXT",
     "country_code TEXT",
     "parent_id TEXT",
@@ -81,6 +86,7 @@ class Channel extends SqliteModel {
     required this.readMaxRole,
     required this.writeMaxRole,
     required this.name,
+    required this.type,
     this.lastMessageText,
     this.lastMessageMedia,
     this.lastMessageAudio,

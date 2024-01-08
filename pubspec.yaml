@@ -1,6 +1,6 @@
 name: mockingbird_messaging
 description: A Instant Messaging utils.
-version: 0.0.54
+version: 0.0.57
 homepage: https://github.com/dev-mockingbird/mockingbird_messaging
 
 environment:
