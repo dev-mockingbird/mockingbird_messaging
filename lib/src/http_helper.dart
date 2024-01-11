@@ -169,7 +169,7 @@ class DioHelper {
       Response res = await d();
       if (res.statusCode == null || (res.statusCode ?? 200) >= 300) {
         _handleError(handleError, _parseBody(res));
-        return;
+        return false;
       }
       if (res.data is String) {
         return jsonDecode(res.data);
@@ -180,11 +180,11 @@ class DioHelper {
         if (kDebugMode) {
           print(e);
         }
-        return;
+        return false;
       }
       if (onError != null) {
         onError!(e);
-        return;
+        return false;
       }
       rethrow;
     }

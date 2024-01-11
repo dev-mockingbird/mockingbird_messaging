@@ -118,7 +118,7 @@ class HttpUserManager extends UserManager {
               "new_password": password,
             },
             handleError: onError) !=
-        null;
+        false;
   }
 
   @override
@@ -137,7 +137,7 @@ class HttpUserManager extends UserManager {
               "verify_code": verifyCode,
             },
             handleError: onError) !=
-        null;
+        false;
   }
 
   @override
@@ -152,12 +152,13 @@ class HttpUserManager extends UserManager {
           "passcode": passcode,
         },
         showError: onError);
-    if (res != null) {
-      return LoginUser(
-          token: res['data']['token'],
-          user: User.fromJson(res['data']['user']));
+    if (res == false) {
+      return null;
     }
-    return null;
+    return LoginUser(
+      token: res['data']['token'],
+      user: User.fromJson(res['data']['user']),
+    );
   }
 
   @override
@@ -167,6 +168,9 @@ class HttpUserManager extends UserManager {
       data["keyword"] = keyword;
     }
     final res = await helper.get('/search-users', data: data);
+    if (res == false) {
+      return [];
+    }
     return (res['data'] as List).map((x) => User.fromJson(x)).toList();
   }
 
@@ -174,12 +178,12 @@ class HttpUserManager extends UserManager {
   Future<bool> sendVerifyCode(ContactType contactType, String contact) async {
     return await helper
             .post('/verify-code/${contactTypes[contactType]}/$contact') !=
-        null;
+        false;
   }
 
   @override
   Future<bool> signout() async {
-    return await helper.post("/signout") != null;
+    return await helper.post("/signout") != false;
   }
 
   @override
@@ -192,42 +196,46 @@ class HttpUserManager extends UserManager {
     String password, {
     HandleError? onError,
   }) async {
-    var res = await helper.post('/signup',
-        data: {
-          "name": username,
-          "contact": contact,
-          "country_code": countryCode,
-          "contact_type": contactTypes[contactType],
-          "verify_code": verifyCode,
-          "password": password,
-        },
-        showError: onError);
-    if (res != null) {
-      return LoginUser(
-        token: res['data']['token'],
-        user: User.fromJson(res['data']['user']),
-      );
+    var res = await helper.post(
+      '/signup',
+      data: {
+        "name": username,
+        "contact": contact,
+        "country_code": countryCode,
+        "contact_type": contactTypes[contactType],
+        "verify_code": verifyCode,
+        "password": password,
+      },
+      showError: onError,
+    );
+    if (res == false) {
+      return null;
     }
-    return null;
+    return LoginUser(
+      token: res['data']['token'],
+      user: User.fromJson(res['data']['user']),
+    );
   }
 
   @override
-  Future<AccountType?> verifyAccount(String account,
-      {HandleError? onError}) async {
+  Future<AccountType?> verifyAccount(
+    String account, {
+    HandleError? onError,
+  }) async {
     var res = await helper.get("/accounts/$account", onError: onError);
-    if (res != null) {
-      switch (res["data"]["type"]) {
-        case "email":
-          return AccountType.email;
-        case "phone_number":
-          return AccountType.phoneNumber;
-        case "username":
-          return AccountType.username;
-        default:
-          return AccountType.unkown;
-      }
+    if (res == null) {
+      return null;
     }
-    return null;
+    switch (res["data"]["type"]) {
+      case "email":
+        return AccountType.email;
+      case "phone_number":
+        return AccountType.phoneNumber;
+      case "username":
+        return AccountType.username;
+      default:
+        return AccountType.unkown;
+    }
   }
 
   @override
@@ -236,19 +244,15 @@ class HttpUserManager extends UserManager {
     String? avatarUrl,
     HandleError? onError,
   }) async {
-    try {
-      await helper.put(
-        "/user-info",
-        data: {
-          "nickname": nickname,
-          "avatar_url": avatarUrl,
-        },
-        handleError: onError,
-      );
-    } catch (e) {
-      return false;
-    }
-    return true;
+    return await helper.put(
+          "/user-info",
+          data: {
+            "nickname": nickname,
+            "avatar_url": avatarUrl,
+          },
+          handleError: onError,
+        ) !=
+        false;
   }
 
   @override
@@ -258,19 +262,15 @@ class HttpUserManager extends UserManager {
     required String verifyCode,
     HandleError? onError,
   }) async {
-    try {
-      await helper.put(
-        "/user-info",
-        data: {
-          "contact_type": contactTypes[type],
-          "contact": contact,
-          "verify_code": verifyCode,
-        },
-        handleError: onError,
-      );
-    } catch (e) {
-      return false;
-    }
-    return true;
+    return await helper.put(
+          "/user-info",
+          data: {
+            "contact_type": contactTypes[type],
+            "contact": contact,
+            "verify_code": verifyCode,
+          },
+          handleError: onError,
+        ) !=
+        false;
   }
 }

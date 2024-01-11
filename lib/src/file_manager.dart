@@ -3,8 +3,6 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import 'package:flutter/foundation.dart';
-
 import 'fileinfo.dart';
 import 'http_helper.dart';
 
@@ -72,15 +70,18 @@ class HttpFileManager extends FileManager {
   DioHelper helper;
   HttpFileManager({required this.helper});
   @override
-  Future<String> createFileId() async {
+  Future<String?> createFileId() async {
     final res = await helper.post('/files');
-    return res['data']['id'];
+    if (res != false) {
+      return res['data']['id'];
+    }
+    return null;
   }
 
   @override
   Future<String?> getAccessUrl(String id) async {
     final res = await helper.get('/files/$id');
-    if (res != null) {
+    if (res != false) {
       return res['data']['access_url'];
     }
     return null;
@@ -93,24 +94,17 @@ class HttpFileManager extends FileManager {
     Function(int sent, int total)? onSent,
     Function(dynamic)? onFail,
   }) async {
-    try {
-      var res = await helper.upload(
-        '/files/$id',
-        file,
-        method: 'put',
-        onSent: onSent,
-        handleError: onFail,
-      );
-      if (res != null) {
-        return FileInfo.fromJson(res['data']);
-      }
-      return null;
-    } catch (e) {
-      if (kDebugMode) {
-        print(e);
-      }
-      return null;
+    var res = await helper.upload(
+      '/files/$id',
+      file,
+      method: 'put',
+      onSent: onSent,
+      handleError: onFail,
+    );
+    if (res != false) {
+      return FileInfo.fromJson(res['data']);
     }
+    return null;
   }
 
   @override
@@ -133,27 +127,20 @@ class HttpFileManager extends FileManager {
 
   @override
   Future<FileInfo?> getFileInfo(String id) async {
-    try {
-      final res = await helper.get('/files/$id');
-      if (res == null) {
-        return null;
-      }
-      var raw = res['data']['info'];
-      if (raw != null) {
-        var info = FileInfo.fromJson(raw);
-        info.accessUrl = res['data']['access_url'];
-        return info;
-      }
-      return FileInfo(
-        id: id,
-        mimeType: "unknown",
-        accessUrl: res['data']['access_url'],
-      );
-    } catch (e) {
-      if (kDebugMode) {
-        print(e);
-      }
+    final res = await helper.get('/files/$id');
+    if (res == false) {
       return null;
     }
+    var raw = res['data']['info'];
+    if (raw != null) {
+      var info = FileInfo.fromJson(raw);
+      info.accessUrl = res['data']['access_url'];
+      return info;
+    }
+    return FileInfo(
+      id: id,
+      mimeType: "unknown",
+      accessUrl: res['data']['access_url'],
+    );
   }
 }
