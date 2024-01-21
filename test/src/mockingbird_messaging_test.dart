@@ -115,6 +115,10 @@ void main() async {
       var fileId = await um.createFileId();
       print(fileId);
     });
+    test("fetch users", () async {
+      UserManager um = HttpUserManager(helper: getDioHelper());
+      await um.fetchUsers(keyword: "hello", userIds: ["1", "2"], limit: 20);
+    });
     test("miaoba", () async {
       SharedPreferences.setMockInitialValues({});
       WidgetsFlutterBinding.ensureInitialized();

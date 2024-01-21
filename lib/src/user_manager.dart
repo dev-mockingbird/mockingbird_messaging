@@ -49,7 +49,11 @@ abstract class UserManager {
 
   Future<bool> signout();
 
-  Future<List<User>?> search(String keyword);
+  Future<List<User>?> fetchUsers({
+    String? keyword,
+    List<String>? userIds,
+    int? limit,
+  });
 
   Future<bool> sendVerifyCode(
     ContactType contactType,
@@ -162,12 +166,22 @@ class HttpUserManager extends UserManager {
   }
 
   @override
-  Future<List<User>> search(String keyword, {int limit = 20}) async {
+  Future<List<User>?> fetchUsers({
+    String? keyword,
+    List<String>? userIds,
+    int? limit,
+  }) async {
     Map<String, dynamic> data = {};
-    if (keyword != "") {
+    if (keyword != null) {
       data["keyword"] = keyword;
     }
-    final res = await helper.get('/search-users', data: data);
+    if (userIds != null) {
+      data["user_ids"] = userIds;
+    }
+    if (limit != null) {
+      data["limit"] = limit;
+    }
+    final res = await helper.get('/users', data: data);
     if (res == false) {
       return [];
     }
