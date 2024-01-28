@@ -46,6 +46,7 @@ class Channel extends SqliteModel {
 
   static const List<String> fields = [
     "id TEXT PRIMARY KEY",
+    "client_user_id TEXT",
     "type TEXT",
     "channel_id TEXT",
     "country_code TEXT",

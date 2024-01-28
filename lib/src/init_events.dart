@@ -8,41 +8,133 @@ import 'event/event.dart';
 part 'init_events.g.dart';
 
 @JsonSerializable(fieldRename: FieldRename.snake)
-class SyncModelRequest extends Payload {
-  static const String eventType = 'model.sync.request';
-  String model;
-  String lastUpdatedAt;
-  String userId;
-
-  SyncModelRequest({
-    required this.model,
-    required this.userId,
-    required this.lastUpdatedAt,
-  });
-
-  @override
-  Map<String, dynamic> toJson() => _$SyncModelRequestToJson(this);
+class SyncModel extends Payload {
+  static String eventType = "model.sync";
+  List<dynamic> actions;
+  SyncModel({required this.actions});
 
   @override
   String get type => eventType;
+
+  @override
+  Map<String, dynamic> toJson() => _$SyncModelToJson(this);
+
+  factory SyncModel.fromJson(Map<String, dynamic> json) =>
+      _$SyncModelFromJson(json);
+}
+
+abstract class SyncModelRequest extends Payload {
+  String lastUpdatedAt;
+  List<String>? ids;
+
+  SyncModelRequest({
+    required this.lastUpdatedAt,
+    this.ids,
+  });
+}
+
+abstract class SyncModelWithChannel extends Payload {
+  String lastUpdatedAt;
+  String channelId;
+  SyncModelWithChannel({
+    required this.lastUpdatedAt,
+    required this.channelId,
+  });
 }
 
 @JsonSerializable(fieldRename: FieldRename.snake)
-class SyncModelDone extends Payload {
-  static const String eventType = 'model.sync.done';
-  String model;
+class SyncModelChannel extends SyncModelRequest {
+  static String eventType = "model.sync.channel";
 
-  SyncModelDone({
-    required this.model,
+  SyncModelChannel({
+    required super.lastUpdatedAt,
+    super.ids,
   });
 
   @override
-  Map<String, dynamic> toJson() => _$SyncModelDoneToJson(this);
+  String get type => eventType;
 
-  factory SyncModelDone.fromJson(Map<String, dynamic> json) =>
-      _$SyncModelDoneFromJson(json);
+  @override
+  Map<String, dynamic> toJson() => _$SyncModelChannelToJson(this);
+
+  factory SyncModelChannel.fromJson(Map<String, dynamic> json) =>
+      _$SyncModelChannelFromJson(json);
+}
+
+@JsonSerializable(fieldRename: FieldRename.snake)
+class SyncModelContact extends SyncModelRequest {
+  static String eventType = "model.sync.contact";
+
+  SyncModelContact({
+    required super.lastUpdatedAt,
+    super.ids,
+  });
+
   @override
   String get type => eventType;
+
+  @override
+  Map<String, dynamic> toJson() => _$SyncModelContactToJson(this);
+
+  factory SyncModelContact.fromJson(Map<String, dynamic> json) =>
+      _$SyncModelContactFromJson(json);
+}
+
+@JsonSerializable(fieldRename: FieldRename.snake)
+class SyncModelMessage extends SyncModelWithChannel {
+  static String eventType = "model.sync.message";
+
+  SyncModelMessage({
+    required super.lastUpdatedAt,
+    required super.channelId,
+  });
+
+  @override
+  String get type => eventType;
+
+  @override
+  Map<String, dynamic> toJson() => _$SyncModelMessageToJson(this);
+
+  factory SyncModelMessage.fromJson(Map<String, dynamic> json) =>
+      _$SyncModelMessageFromJson(json);
+}
+
+@JsonSerializable(fieldRename: FieldRename.snake)
+class SyncModelMessageLike extends SyncModelWithChannel {
+  static String eventType = "model.sync.message.like";
+
+  SyncModelMessageLike({
+    required super.lastUpdatedAt,
+    required super.channelId,
+  });
+
+  @override
+  String get type => eventType;
+
+  @override
+  Map<String, dynamic> toJson() => _$SyncModelMessageLikeToJson(this);
+
+  factory SyncModelMessageLike.fromJson(Map<String, dynamic> json) =>
+      _$SyncModelMessageLikeFromJson(json);
+}
+
+@JsonSerializable(fieldRename: FieldRename.snake)
+class SyncModelMessageTag extends SyncModelWithChannel {
+  static String eventType = "model.sync.message.tag";
+
+  SyncModelMessageTag({
+    required super.lastUpdatedAt,
+    required super.channelId,
+  });
+
+  @override
+  String get type => eventType;
+
+  @override
+  Map<String, dynamic> toJson() => _$SyncModelMessageTagToJson(this);
+
+  factory SyncModelMessageTag.fromJson(Map<String, dynamic> json) =>
+      _$SyncModelMessageTagFromJson(json);
 }
 
 @JsonSerializable(fieldRename: FieldRename.snake)

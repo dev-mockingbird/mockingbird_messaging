@@ -105,7 +105,7 @@ class HttpUserManager extends UserManager {
 
   static const Map<PassType, String> passTypes = {
     PassType.password: "password",
-    PassType.verifyCode: "verify-code",
+    PassType.verifyCode: "verifycode",
   };
 
   DioHelper helper;

@@ -33,6 +33,7 @@ class Subscriber extends NamedAvatar {
     List<String> fields = NamedAvatar.fields;
     fields.addAll([
       "user_id TEXT",
+      "client_user_id TEXT",
       "folder TEXT",
       "channel_id TEXT",
       "invited_by TEXT",

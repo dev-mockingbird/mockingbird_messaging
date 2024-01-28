@@ -30,6 +30,7 @@ class Message extends SqliteModel {
   static const List<String> fields = [
     'id TEXT PRIMARY KEY',
     'channel_id TEXT',
+    "client_user_id TEXT",
     'prev_id TEXT',
     'refer_message_id TEXT',
     'audio TEXT',

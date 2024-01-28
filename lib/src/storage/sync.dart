@@ -4,10 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 import 'dart:convert';
-
-import 'package:mockingbird_messaging/src/storage/model/model_sync.dart';
 import 'package:sqflite/sqflite.dart';
-
 import '../event/event.dart';
 
 class SyncDB {
@@ -26,49 +23,36 @@ class SyncDB {
   });
 
   applyEvent(String userId, ModelChanged event) async {
-    Map<String, String> lastUpdated = {};
     for (var action in event.actions) {
       if (!persistances.contains(action.model)) {
         continue;
       }
-      var updatedAt = action.data?["updated_at"];
-      if (updatedAt != null) {
-        if (lastUpdated[action.model] == null) {
-          lastUpdated[action.model] = updatedAt;
-        } else if (lastUpdated[action.model]!.compareTo(updatedAt) < 0) {
-          lastUpdated[action.model] = updatedAt;
-        }
-      }
       switch (action.action) {
         case ModelAction.deleted:
-          await _delete(action.model, action);
+          await _delete(action.model, action, userId);
         case ModelAction.updated:
-          await _update(action.model, action);
+          await _update(action.model, action, userId);
         case ModelAction.created:
-          await _create(action.model, action);
+          await _create(action.model, action, userId);
         default:
         // warning here
       }
     }
-    for (var m in lastUpdated.keys) {
-      db.insert(
-          ModelSync.stableName,
-          {
-            "model": m,
-            "user_id": userId,
-            "last_updated_at": lastUpdated[m],
-          },
-          conflictAlgorithm: ConflictAlgorithm.replace);
-    }
   }
 
-  _create(String model, ModelAction event) async {
+  _create(String model, ModelAction event, String userId) async {
     if (event.data == null) {
       // warning here
       return;
     }
-    await db.insert(model, _fixData(event.data!),
-        conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert(
+      model,
+      fixData({
+        ...event.data!,
+        "client_user_id": userId,
+      }),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   static Map<String, dynamic> _fixNullableTimeColumn(
@@ -111,10 +95,10 @@ class SyncDB {
   }
 
   static alignModel(Map<String, dynamic> data) {
-    return _fixData(data);
+    return fixData(data);
   }
 
-  static Map<String, dynamic> _fixData(Map<String, dynamic> data) {
+  static Map<String, dynamic> fixData(Map<String, dynamic> data) {
     for (var col in ['last_read_message_at', 'last_message_at']) {
       data = _fixNullableTimeColumn(data, col);
     }
@@ -145,28 +129,30 @@ class SyncDB {
     return data;
   }
 
-  _update(String model, ModelAction event) async {
+  _update(String model, ModelAction event, String userId) async {
     if (event.data == null) {
       // warning here
       return;
     }
     await db.update(
       model,
-      _fixData(event.data!),
-      where: "id IN (${event.recordIds!.map((v) => '?').join(',')})",
-      whereArgs: event.recordIds,
+      fixData(event.data!),
+      where:
+          "id IN (${event.recordIds!.map((v) => '?').join(',')}) AND client_user_id = ?",
+      whereArgs: [...event.recordIds!, userId],
     );
   }
 
-  _delete(String model, ModelAction event) async {
+  _delete(String model, ModelAction event, String userId) async {
     if (event.data == null) {
       // warning here
       return;
     }
     await db.delete(
       model,
-      where: "id IN (${event.recordIds!.map((v) => '?').join(',')})",
-      whereArgs: event.recordIds,
+      where:
+          "id IN (${event.recordIds!.map((v) => '?').join(',')}) AND client_user_id = ?",
+      whereArgs: [...event.recordIds!, userId],
     );
   }
 }

@@ -44,7 +44,6 @@ Future<Mockingbird> installServiceWithTransport(
         break;
       case MockingbirdState.modelSynced:
         print("model synced");
-        completer.complete();
         break;
     }
   });
@@ -172,7 +171,7 @@ void main() async {
       SharedPreferences.setMockInitialValues({});
       WidgetsFlutterBinding.ensureInitialized();
       Mockingbird mockingbird =
-          await installService("MDAwMDA1cjBqdHhpNWwzNB==");
+          await installService("MDAwMDA4dGh1MW1rODNrMA==");
       mockingbird.send(buildEvent(TypeMessage(
         channelId: "000005302j4jaygw",
         content: "你好",

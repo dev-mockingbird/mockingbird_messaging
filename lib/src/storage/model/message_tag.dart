@@ -12,6 +12,7 @@ class MessageTag extends SqliteModel {
   static const String stableName = "message_tags";
   static const List<String> fields = [
     'id TEXT PRIMARY KEY',
+    "client_user_id TEXT",
     'channel_id TEXT',
     'message_id TEXT',
     'creator_user_id TEXT',

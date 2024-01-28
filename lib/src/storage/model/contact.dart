@@ -27,7 +27,9 @@ class Contact extends NamedAvatar implements SqliteModel {
   static List<String> get fields {
     List<String> fields = NamedAvatar.fields;
     fields.addAll([
+      "client_user_id TEXT",
       "over_user_id TEXT",
+      "updated_at TEXT",
       "note TEXT",
     ]);
     return fields;

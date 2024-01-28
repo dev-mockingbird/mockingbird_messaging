@@ -54,6 +54,7 @@ class User extends NamedAvatar {
   static List<String> get fields {
     List<String> fields = NamedAvatar.fields;
     fields.addAll([
+      "client_user_id TEXT",
       "updated_at TEXT",
       "email_addr TEXT",
       "phone_number TEXT",
